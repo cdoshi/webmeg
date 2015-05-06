@@ -12,6 +12,7 @@ define(function (require) {
 
         initialize: function () {
             this.render();
+            this.$("#dataCont").css("height",$(document).height() - 52);
         },
 
         render: function () {
@@ -20,8 +21,25 @@ define(function (require) {
         },
 
         events: {
-            
+            'dragenter #dataCont' : 'dropMsg',
+            'dragleave #dataCont' : 'dragMsg',
+            'drop #dataCont' : 'dropEx',
         },
+        
+        dropMsg: function () {
+            $("#dragndropMsg h4")[0].innerHTML = 'Drop the file into the box';
+        },
+        
+        dragMsg: function () {
+            $("#dragndropMsg h4")[0].innerHTML = 'Drag the required file into the box';
+        },
+        
+        dropEx: function(ev) {
+            ev.preventDefault();
+            
+            var a =1;
+        }
+        
     });
 
 });

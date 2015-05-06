@@ -3,6 +3,13 @@ html, body { height: 100% }
     margin-bottom: 0px
 }
 #dataCont {
-    background-color: aqua;
+    background-color: olive;
+    text-align: center;
+    border-style: dashed
+    
+    
+}
+#dropMsg {
+    margin-top: 20%
 }
 
