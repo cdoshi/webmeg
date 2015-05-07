@@ -12,4 +12,6 @@ html, body { height: 100% }
 #dropMsg {
     margin-top: 20%
 }
-
+.alert {
+    margin-bottom:0
+}

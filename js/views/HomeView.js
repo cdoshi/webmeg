@@ -6,6 +6,7 @@ define(function (require) {
         Backbone        = require('backbone'),
         tplText         = require('text!tpl/Home.html'),
         template        = _.template(tplText);
+    
 
 
     return Backbone.View.extend({
@@ -24,6 +25,10 @@ define(function (require) {
             'dragenter #dataCont' : 'dropMsg',
             'dragleave #dataCont' : 'dragMsg',
             'drop #dataCont' : 'dropEx',
+            'dragover #dataCont': function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
         },
         
         dropMsg: function () {
@@ -34,12 +39,27 @@ define(function (require) {
             $("#dragndropMsg h4")[0].innerHTML = 'Drag the required file into the box';
         },
         
-        dropEx: function(ev) {
-            ev.preventDefault();
-            
-            var a =1;
+        dropEx: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            // grab the file list
+            var fileList = e.originalEvent.dataTransfer.files,ext;  
+            // Return if user dragged more than one file 
+            if (fileList.length != 1) {
+                $("#alertDiv").find('.modal-title').text('Load one file only')
+                $("#alertDiv").modal('show');
+                return;
+            }
+            else {
+                ext = fileList[0].name.split('.').pop();
+                require(['jquery', 'backbone','app/format/' + ext + 'Reader','bootstrap'], function ($, Backbone, reader) {
+                    var data = reader.
+                }, function (err) {
+                    $("#alertDiv").find('.modal-title').text('Unsupported file format')
+                    $("#alertDiv").modal('show');
+                });
+            }
         }
-        
     });
 
 });
