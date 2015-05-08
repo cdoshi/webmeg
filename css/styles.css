@@ -12,6 +12,11 @@ html, body { height: 100% }
 #dropMsg {
     margin-top: 20%
 }
+#fileSelect {
+    opacity: 0;
+    z-index: 1;
+    position: absolute
+}
 .alert {
     margin-bottom:0
 }

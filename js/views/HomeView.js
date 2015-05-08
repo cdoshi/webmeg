@@ -28,7 +28,8 @@ define(function (require) {
             'dragover #dataCont': function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-            }
+            },
+            'change #fileSelect': 'dropEx'
         },
         
         dropMsg: function () {
@@ -43,7 +44,7 @@ define(function (require) {
             e.stopPropagation();
             e.preventDefault();
             // grab the file list
-            var fileList = e.originalEvent.dataTransfer.files,ext;  
+            var fileList = e.target.files || e.originalEvent.dataTransfer.files,ext;  
             // Return if user dragged more than one file 
             if (fileList.length != 1) {
                 $("#alertDiv").find('.modal-title').text('Load one file only')
@@ -53,7 +54,7 @@ define(function (require) {
             else {
                 ext = fileList[0].name.split('.').pop();
                 require(['jquery', 'backbone','app/format/' + ext + 'Reader','bootstrap'], function ($, Backbone, reader) {
-                    var data = reader.
+                    
                 }, function (err) {
                     $("#alertDiv").find('.modal-title').text('Unsupported file format')
                     $("#alertDiv").modal('show');

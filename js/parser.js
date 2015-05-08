@@ -110,7 +110,6 @@ define(function (require) {
         Scanner: Scanner,
         jumpTo : jumpTo,
         scan : scan,
-        flipEndianness: flipEndianness
     };
     
         
