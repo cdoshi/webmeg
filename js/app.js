@@ -18,6 +18,10 @@ require.config({
         'bootstrap': { 
             deps: ['jquery'] 
         }, 
+        'highcharts': {
+            deps: ['jquery'],
+            exports: 'Highcharts'
+        }
     }
 
 });

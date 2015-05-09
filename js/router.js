@@ -13,12 +13,18 @@ define(function (require) {
 
         routes: {
             "": "home",
+            "help": "help"
         },
 
         home: function () {
             homeView.delegateEvents();
             slider.slidePage(homeView.$el);
         },
+        help: function() {
+            require(['app/views/HelpView'], function (HelpView) {
+                slider.slidePage(new HelpView().$el);
+            });
+        }
     });
 
 });

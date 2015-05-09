@@ -4,10 +4,10 @@ define(function (require) {
 
     var $               = require('jquery'),
         Backbone        = require('backbone'),
-        tplText         = require('text!tpl/Home.html'),
-        template        = _.template(tplText),
-        alertTplText    = require('text!tpl/Alert.html'),
-        alertTemplate   = _.template(alertTplText);
+        tplText         = require('text!tpl/Help.html'),
+        template        = _.template(tplText);
+    
+
 
     return Backbone.View.extend({
 
@@ -17,7 +17,7 @@ define(function (require) {
         },
 
         render: function () {
-            this.$el.html(template() + alertTemplate());
+            this.$el.html(template());
             return this;
         },
 
@@ -54,7 +54,7 @@ define(function (require) {
             else {
                 ext = fileList[0].name.split('.').pop();
                 require(['jquery', 'backbone','app/format/' + ext + 'Reader','bootstrap'], function ($, Backbone, reader) {
-                    reader.fiff_read_info(fileList);
+                    
                 }, function (err) {
                     $("#alertDiv").find('.modal-title').text('Unsupported file format')
                     $("#alertDiv").modal('show');

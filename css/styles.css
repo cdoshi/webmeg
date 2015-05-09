@@ -1,22 +1,49 @@
-html, body { height: 100% }
+html, body { 
+    height: 100% 
+}
+
 .navbar {
     margin-bottom: 0px
 }
+
 #dataCont {
     background-color: olive;
     text-align: center;
-    border-style: dashed
-    
-    
+    border-style: dashed 
 }
+
 #dropMsg {
     margin-top: 20%
 }
+
 #fileSelect {
     opacity: 0;
     z-index: 1;
     position: absolute
 }
+
 .alert {
-    margin-bottom:0
+    margin-bottom: 0
+}
+
+.modal-backdrop.in {
+    opacity: 0
+}
+
+.modal-backdrop {
+    position: inherit
+}
+.navbar-brand {
+    position: absolute;
+    width: 50%;
+    left: 25%;
+    top: 0;
+    text-align: center;
+    margin: auto;
+}
+
+.back-button {
+    margin-top: 7px;
+    background-color: #F8F8F8;
+    border-color: #F8F8F8    
 }
