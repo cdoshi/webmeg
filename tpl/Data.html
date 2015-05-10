@@ -9,7 +9,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">WebMEG</a>
+            <a class="navbar-brand" href="#"><%= fileName %></a>
         </div>
         
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -20,24 +20,44 @@
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <li>
+                            <a href="#" data-toggle="modal" data-target="#newevtty">Create new event type</a>
+                        </li>
+                        <li>
                             <a href="#">
-                                <span> 
-                                    <input type="file" id="fileSelect"/>
-                                    Load file for display
-                                </span>
+                                <span> Mark new event </span>
                             </a>
-                            <a href="#">Save File</a>
                         </li>
                     </ul>
                 </li>
                 <li><a href="#help">Help</a></li>
+                <li><a href="#">Reset</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
 
-<div class="container-fluid" id="dropCont">
-    <div id="dragndropMsg">
-        <h4>Drag the required file into the box</h4>
-    </div>
+<div class="container-fluid" id="dataCont">
+    
 </div>
+
+<div class="modal fade" id="newevtty">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Create new event type</h4>
+      </div>
+        
+      <div class="modal-body">
+          <input type="text" class="form-control" placeholder="Event1">
+      </div>
+        
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+        
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

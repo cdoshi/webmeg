@@ -7,13 +7,13 @@ define(function (require) {
         PageSlider = require('pageslider'),
         HomeView = require('app/views/HomeView'),
         slider = new PageSlider($('body')),
-        homeView = new HomeView();
+        homeView = new HomeView({slider:slider});
 
     return Backbone.Router.extend({
 
         routes: {
             "": "home",
-            "help": "help"
+            "help": "help",
         },
 
         home: function () {
@@ -24,7 +24,7 @@ define(function (require) {
             require(['app/views/HelpView'], function (HelpView) {
                 slider.slidePage(new HelpView().$el);
             });
-        }
+        },
     });
 
 });
