@@ -46,7 +46,8 @@ define(function (require) {
             e.preventDefault();
             // grab the file list
             var fileList = e.target.files || e.originalEvent.dataTransfer.files,
-                slider = this.options.slider,
+                options = this.options,
+                slider = options.slider,
                 ext;  
             
             // Return if more than one file
@@ -60,7 +61,9 @@ define(function (require) {
                 ext = fileList[0].name.split('.').pop();
                 require(['jquery', 'backbone','app/format/' + ext + 'Reader','app/views/DataView','bootstrap'], 
                         function ($, Backbone, reader,DataView) {
-                    slider.slidePage(new DataView({fileList:fileList}).$el);
+                    options.dataModel.set({file:fileList});
+                    slider.slidePage(new DataView({dataModel:options.dataModel}).$el);
+                    
                     location.hash="dataview";
                     
                 }, function (err) {

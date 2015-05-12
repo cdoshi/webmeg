@@ -18,7 +18,7 @@ define(function (require) {
         },
 
         render: function () {
-            var fileList = this.options.fileList;
+            var fileList = this.options.dataModel.get('file');
             this.$el.html(template({fileName: fileList[0].name}) + alertTemplate());
             return this;
         },

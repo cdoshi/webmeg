@@ -6,6 +6,11 @@ require.config({
         app: '../js',
         tpl: '../tpl'
     },
+    map: {
+        '*': {
+            'app/models': 'app/models/data'
+        }
+    },
 
     shim: {
         'backbone': {
