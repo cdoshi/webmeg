@@ -7,13 +7,10 @@ define(function (require) {
 
         DataFile = Backbone.Model.extend({
             defaults: {
-                file:{}
+                file:{},
+                type:''
             },
             initialize: function() {
-                this.on("change:file", function(model){
-                    var name = model.get("file"); 
-                    console.log("Changed my name to " + name );
-                });
             }
         })
 

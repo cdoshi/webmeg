@@ -7,7 +7,7 @@ define(function (require) {
 	   this._dataPointer = 0;
 	   this._nativeLittleEndian = new Int8Array(new Int16Array([1]).buffer)[0] > 0;
 	   this._littleEndian = false;//true;s
-    },
+    };
         
     /**
      * Jump to a position in the byte stream.
@@ -15,9 +15,9 @@ define(function (require) {
      * @param {!number} position The new offset.
      */
         
-    jumpTo = function(position) {
+    Scanner.prototype.jumpTo = function(position) {
         this._dataPointer = position;
-    },
+    };
 
     /**
      * Scan binary data relative to the internal position in the byte stream.
@@ -26,7 +26,7 @@ define(function (require) {
      *          'uchar','schar','ushort','sshort','uint','sint','float'
      * @param {!number=} chunks The number of chunks to scan. By default, 1.
      */
-    scan = function(type, chunks) {
+    Scanner.prototype.scan = function(type, chunks) {
 
         if (typeof chunks == 'undefined') {
             chunks = 1;
@@ -93,7 +93,7 @@ define(function (require) {
      * @param {!number} chunkSize The size of each element.
      * @return {!Object} The converted typed array.
      */
-    flipEndianness = function(array, chunkSize) {
+    Scanner.prototype.flipEndianness = function(array, chunkSize) {
 
         var u8 = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
         for ( var i = 0; i < array.byteLength; i += chunkSize) {
@@ -107,9 +107,7 @@ define(function (require) {
     };
         
     return {
-        Scanner: Scanner,
-        jumpTo : jumpTo,
-        scan : scan,
+        Scanner: Scanner
     };
     
         

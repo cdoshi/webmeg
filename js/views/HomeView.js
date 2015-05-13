@@ -14,7 +14,6 @@ define(function (require) {
         initialize: function (options) {
             this.options = options;
             this.render();
-            this.$("#dropCont").css("height",$(document).height() - 52);
         },
 
         render: function () {
@@ -30,7 +29,8 @@ define(function (require) {
                 e.stopPropagation();
                 e.preventDefault();
             },
-            'change #fileSelect': 'dropEx'
+            'change #fileSelect': 'dropEx',
+            'resize': 'resize'
         },
         
         dropMsg: function () {
@@ -59,18 +59,28 @@ define(function (require) {
             else {
                 
                 ext = fileList[0].name.split('.').pop();
-                require(['jquery', 'backbone','app/format/' + ext + 'Reader','app/views/DataView','bootstrap'], 
-                        function ($, Backbone, reader,DataView) {
-                    options.dataModel.set({file:fileList});
-                    slider.slidePage(new DataView({dataModel:options.dataModel}).$el);
+                require(['app/format/' + ext + 'Reader'], function (reader) {
                     
                     location.hash="dataview";
                     
+                    var header = reader.getHeader(fileList[0]), // Get header information of the file
+                        data   = reader.getData(header,0,10);   // Get first 10 seconds of data
+                    
+                    
+                    options.dataModel.set({file:fileList,type:ext});
+                    
                 }, function (err) {
+                    console.log(err);
                     $("#alertDiv").find('.modal-title').text('Unsupported file format')
                     $("#alertDiv").modal('show');
                 });
             }
+            $("#dragndropMsg h4").text('Drag the required file into the box');
+
+        },
+        
+        resize: function() {
+            console.log('hi');
         }
     });
 

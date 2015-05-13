@@ -29,12 +29,11 @@ define(function (require) {
             });
         },
         dataview: function() {
-            if(dataModel.get('file').length === undefined) {
-                slider.slidePage(homeView.$el);
-            }
+            if(dataModel.get('file').length === undefined)
+                window.location = "#";
             else {
-                require(['jquery', 'backbone','app/views/DataView','bootstrap'], 
-                        function ($, Backbone,DataView) {
+                require(['app/views/DataView'], 
+                        function (DataView) {
                     slider.slidePage(new DataView({dataModel:dataModel}).$el);
                 });
             }

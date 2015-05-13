@@ -9,11 +9,13 @@ html, body {
 #dropCont {
     background-color: olive;
     text-align: center;
-    border-style: dashed 
+    border-style: dashed;
+    height: calc(100% - 52px);
 }
 
-#dropMsg {
-    margin-top: 20%
+#dragndropMsg {
+    top: 50%;
+    position: relative
 }
 
 #fileSelect {
@@ -40,6 +42,8 @@ html, body {
     top: 0;
     text-align: center;
     margin: auto;
+    overflow: hidden;
+    text-overflow: ellipsis
 }
 
 .back-button {
