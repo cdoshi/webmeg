@@ -32,9 +32,9 @@ define(function (require) {
             if(dataModel.get('file').length === undefined)
                 window.location = "#";
             else {
-                require(['app/views/DataView'], 
-                        function (DataView) {
-                    slider.slidePage(new DataView({dataModel:dataModel}).$el);
+                require(['app/format/' + dataModel.get('type') + 'Reader','app/views/DataView'], 
+                        function (reader,DataView) {                    
+                    slider.slidePage(new DataView({dataModel:dataModel,reader:reader}).$el);
                 });
             }
             

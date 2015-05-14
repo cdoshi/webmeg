@@ -57,16 +57,10 @@ define(function (require) {
                 return;
             }
             else {
-                
                 ext = fileList[0].name.split('.').pop();
-                require(['app/format/' + ext + 'Reader'], function (reader) {
-                    
+                
+                require(['app/format/' + ext + 'Reader'], function (reader) {      
                     location.hash="dataview";
-                    
-                    var header = reader.getHeader(fileList[0]), // Get header information of the file
-                        data   = reader.getData(header,0,10);   // Get first 10 seconds of data
-                    
-                    
                     options.dataModel.set({file:fileList,type:ext});
                     
                 }, function (err) {

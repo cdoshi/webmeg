@@ -28,11 +28,11 @@ define(function (require) {
      */
     Scanner.prototype.scan = function(type, chunks) {
 
-        if (typeof chunks == 'undefined') {
-            chunks = 1;
-        }
-        var _chunkSize = 1;
-        var _array_type = Uint8Array;
+        if (typeof chunks === 'undefined') chunks = 1;
+        
+        var _chunkSize = 1,
+            _array_type = Uint8Array;
+        
         switch (type) {
         // 1 byte data types
         case 'uchar':
@@ -72,15 +72,15 @@ define(function (require) {
                 this._dataPointer += chunks * _chunkSize));
         
         // if required, flip the endianness of the bytes
-        if (this._nativeLittleEndian != this._littleEndian) {
+        if (this._nativeLittleEndian != this._littleEndian)
             // we need to flip here since the format doesn't match the native endianness
             _bytes = this.flipEndianness(_bytes, _chunkSize);
-        }
         
-        if (chunks === 1) {
+        
+        if (chunks === 1)
             // if only one chunk was requested, just return one value
             return _bytes[0];
-        }
+        
         // return the byte array
         return _bytes;
     },

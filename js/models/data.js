@@ -8,7 +8,9 @@ define(function (require) {
         DataFile = Backbone.Model.extend({
             defaults: {
                 file:{},
-                type:''
+                type:'',
+                dataPointer:0,
+                data:[]
             },
             initialize: function() {
             }

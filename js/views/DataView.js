@@ -14,7 +14,20 @@ define(function (require) {
         initialize: function (options) {
             this.options = options;
             this.render();
-            this.$("#dataCont").css("height",$(document).height() - 52);
+            
+            var dataModel = options.dataModel,
+                reader    = options.reader;
+            
+            // Get header information of the file
+            reader.getHeader(dataModel); 
+            
+            var a =1;
+                
+            
+            
+            // Get 10 seconds of data or whichever is less
+            //dataModel.data = options.reader.getData(dataModel.hdr,0,10);
+            
         },
 
         render: function () {
