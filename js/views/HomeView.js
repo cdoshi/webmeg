@@ -13,6 +13,8 @@ define(function (require) {
 
         initialize: function (options) {
             this.options = options;
+            this.listenTo(this.model, 'change:file', this.dataView);
+
             this.render();
         },
 
@@ -33,7 +35,6 @@ define(function (require) {
             'click #fileSelect': function(e) {
                 $("#fileSelect").val('');
             },
-            'resize': 'resize'
         },
         
         dropMsg: function () {
@@ -50,7 +51,6 @@ define(function (require) {
             // grab the file list
             var fileList = e.target.files || e.originalEvent.dataTransfer.files,
                 options = this.options,
-                slider = options.slider,
                 ext;
             
             
@@ -64,10 +64,7 @@ define(function (require) {
                 ext = fileList[0].name.split('.').pop();
                 
                 require(['app/format/' + ext + 'Reader'], function (reader) {
-                    location.hash="dataview";
-                    options.dataModel.set({file:fileList,type:ext});
-                    reader.getHeader(options.dataModel);
-                    
+                    options.model.set({file:fileList,type:ext});
                 }, function (err) {
                     console.log(err);
                     $("#alertDiv").find('.modal-title').text('Unsupported file format')
@@ -78,9 +75,9 @@ define(function (require) {
 
         },
         
-        resize: function() {
-            console.log('hi');
-        }
+        dataView: function() {
+            location.hash="dataview";
+        },
     });
 
 });

@@ -8,8 +8,8 @@ define(function (require) {
         HomeView = require('app/views/HomeView'),
         slider = new PageSlider($('body')),
         models  = require('app/models'),
-        dataModel  = new models.DataFile(),
-        homeView = new HomeView({dataModel:dataModel,slider:slider});
+        model  = new models.DataFile(),
+        homeView = new HomeView({model:model});
 
     return Backbone.Router.extend({
 
@@ -29,12 +29,12 @@ define(function (require) {
             });
         },
         dataview: function() {
-            if(dataModel.get('file').length === undefined)
+            if(model.get('file').length === undefined)
                 window.location = "#";
             else {
-                require(['app/format/' + dataModel.get('type') + 'Reader','app/views/DataView'], 
+                require(['app/format/' + model.get('type') + 'Reader','app/views/DataView'], 
                         function (reader,DataView) {                    
-                    slider.slidePage(new DataView({dataModel:dataModel,reader:reader}).$el);
+                    slider.slidePage(new DataView({model:model,reader:reader}).$el);
                 });
             }
             

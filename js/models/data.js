@@ -10,6 +10,7 @@ define(function (require) {
                 file:{},
                 type:'',
                 dataPointer:0,
+                hdr:{},
                 data:[]
             },
             initialize: function() {
