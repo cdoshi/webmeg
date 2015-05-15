@@ -51,3 +51,8 @@ html, body {
     background-color: #F8F8F8;
     border-color: #F8F8F8    
 }
+
+.modal-header {
+    background-color: #337ab7;
+    color: white
+}

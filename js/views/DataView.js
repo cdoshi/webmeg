@@ -14,25 +14,16 @@ define(function (require) {
         initialize: function (options) {
             this.options = options;
             this.render();
-            
-            var dataModel = options.dataModel,
-                reader    = options.reader;
-            
-            // Get header information of the file
-            reader.getHeader(dataModel); 
-            
-            var a =1;
-                
-            
-            
-            // Get 10 seconds of data or whichever is less
-            //dataModel.data = options.reader.getData(dataModel.hdr,0,10);
-            
         },
 
         render: function () {
-            var fileList = this.options.dataModel.get('file');
-            this.$el.html(template({fileName: fileList[0].name}) + alertTemplate());
+            var file = this.options.dataModel.get('file')[0],
+                hdr  = this.options.dataModel.get('hdr');
+            this.$el.html(template({fileName: file.name,
+                                    samF: hdr.samF,
+                                    ns: hdr.ns,
+                                    units:hdr.units,
+                                    fileSize:(hdr.totalSize/1000000).toFixed(2)}) + alertTemplate());
             return this;
         },
 

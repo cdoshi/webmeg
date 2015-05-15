@@ -12,7 +12,7 @@ define(function (require) {
         var reader     = new FileReader(),
             blob,
             file       = dataModel.get('file')[0],
-            endByte = (file.size < 200000) ? file.size : 200000; // Load only 2Mb or whichever is smaller
+            endByte = (file.size < 100000) ? file.size : 100000; // Load only 1Mb or whichever is smaller
         
 		reader.onerror = function(e) {
             console.log(e.target.error.code);
@@ -80,9 +80,10 @@ define(function (require) {
             hdr.transducers[i] = String.fromCharCode.apply(String,_scanner.scan('char',80)).trim();
             
         // Get units
-        hdr.units = [];
-        for (var i = 0;i < numChan;i++)
-            hdr.units[i] = String.fromCharCode.apply(String,_scanner.scan('char',8)).trim();
+        
+        for (var i = 0;i < numChan - 1;i++) _scanner.scan('char',8);
+        
+        hdr.units = String.fromCharCode.apply(String,_scanner.scan('char',8)).trim();
 
         // Get physical minimum
         hdr.physicalMin = [];
@@ -128,6 +129,8 @@ define(function (require) {
             hdr.dc[i] = hdr.physicalMax[i] - hdr.scaleFac[i] * hdr.digitalMax[i];
         
         hdr.dataStart = _scanner._dataPointer;
+        
+        hdr.totalSize = file.size;
         
         dataModel.set('hdr',hdr);
     }

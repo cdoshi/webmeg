@@ -30,6 +30,9 @@ define(function (require) {
                 e.preventDefault();
             },
             'change #fileSelect': 'dropEx',
+            'click #fileSelect': function(e) {
+                $("#fileSelect").val('');
+            },
             'resize': 'resize'
         },
         
@@ -48,7 +51,8 @@ define(function (require) {
             var fileList = e.target.files || e.originalEvent.dataTransfer.files,
                 options = this.options,
                 slider = options.slider,
-                ext;  
+                ext;
+            
             
             // Return if more than one file
             if (fileList.length != 1) {
@@ -59,9 +63,10 @@ define(function (require) {
             else {
                 ext = fileList[0].name.split('.').pop();
                 
-                require(['app/format/' + ext + 'Reader'], function (reader) {      
+                require(['app/format/' + ext + 'Reader'], function (reader) {
                     location.hash="dataview";
                     options.dataModel.set({file:fileList,type:ext});
+                    reader.getHeader(options.dataModel);
                     
                 }, function (err) {
                     console.log(err);
