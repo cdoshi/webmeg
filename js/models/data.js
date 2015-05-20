@@ -11,7 +11,10 @@ define(function (require) {
                 type:'',
                 dataPointer:0,
                 hdr:{},
-                data:[]
+                hdrCnt:0,
+                data:[],
+                dataCnt:0,
+                time:[]
             },
             initialize: function() {
             }

@@ -134,6 +134,7 @@ define(function (require) {
         hdr.totalSize = file.size;
         
         model.set('hdr',hdr);
+        model.set('hdrCnt',model.get('hdrCnt')+1);
     }
     
     function getData(model,from,to) {
@@ -152,6 +153,8 @@ define(function (require) {
             reader           = new FileReader(),
             file             = model.get('file')[0],
             blob;
+        
+        model.set('time',extendArray.serialIndex(from,to - 1/hdr.samF,hdr.samF));
         
         if(endByte > hdr.totalSize) {
             endByte   = file.size;
@@ -200,10 +203,10 @@ define(function (require) {
             }
             indexVal = numSam + i * numSam;
         }
-        
         data = extendArray.subset(data,[':',samples]);
         
         model.set('data',data);
+        model.set('dataCnt',model.get('dataCnt')+1);
     }
     
     

@@ -2,14 +2,14 @@ define(function (require) {
 
     "use strict";
 
-    var $ = require('jquery'),
-        Backbone = require('backbone'),
+    var $          = require('jquery'),
+        Backbone   = require('backbone'),
         PageSlider = require('pageslider'),
-        HomeView = require('app/views/HomeView'),
-        slider = new PageSlider($('body')),
-        models  = require('app/models'),
-        model  = new models.DataFile(),
-        homeView = new HomeView({model:model});
+        HomeView   = require('app/views/HomeView'),
+        slider     = new PageSlider($('body')),
+        models     = require('app/models'),
+        model      = new models.DataFile(),
+        homeView   = new HomeView({model:model});
 
     return Backbone.Router.extend({
 

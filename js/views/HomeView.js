@@ -14,7 +14,6 @@ define(function (require) {
         initialize: function (options) {
             this.options = options;
             this.listenTo(this.model, 'change:file', this.dataView);
-
             this.render();
         },
 
