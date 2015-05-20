@@ -2,7 +2,8 @@ define(function (require) {
 
     "use strict";
     
-    var parser = require('app/parser');
+    var parser      = require('app/parser'),
+        extendArray = require('app/extendArray');
     
     /* The purpose of the getHeader function is to get the metadata and the position
      * where the data starts
@@ -137,21 +138,25 @@ define(function (require) {
     
     function getData(model,from,to) {
         
-        var hdr         = model.get('hdr'),
-            startRecord = Math.floor(from),
-            endRecord   = Math.ceil(to),
-            oneRecord   = hdr.samF * hdr.ns * 2,
-            totalRecord = endRecord - startRecord,
-            totalBytesNeeded = totalRecord * oneRecord, // 2 is because sshort is 2 bytes long
+        var hdr              = model.get('hdr'),
+            startRecord      = Math.floor(from),
+            endRecord        = Math.ceil(to),
+            oneRecord        = hdr.samF * hdr.ns * 2, // 2 is because sshort is 2 bytes long
+            totalRecord      = endRecord - startRecord,
+            totalBytesNeeded = totalRecord * oneRecord, 
             startByte        = hdr.dataStart + (startRecord * oneRecord + 1), 
             endByte          = startByte + totalBytesNeeded,
+            startSam         = parseInt(from - Math.floor(from) * hdr.samF),
+            endSam           = startSam + parseInt((to - from) * hdr.samF) - 1,
+            samples          = extendArray.serialIndex(startSam,endSam),
             reader           = new FileReader(),
-            file            = model.get('file')[0],
+            file             = model.get('file')[0],
             blob;
         
         if(endByte > hdr.totalSize) {
             endByte   = file.size;
             startByte = endByte - totalBytesNeeded;
+            samples   = ':';
         }
         
         reader.onerror = function(e) {
@@ -161,51 +166,44 @@ define(function (require) {
         reader.onloadend = function(e) {
             if (e.target.readyState == FileReader.DONE) { // DONE == 2
                 var _data = e.target.result;
-                parseData(_data,hdr,totalRecord,model);
+                parseData(_data,hdr,totalRecord,model,samples);
             }
         }
         
         // Do not load entire file in memory. Slice the file
         blob = file.slice(startByte, endByte);
+        
         reader.readAsArrayBuffer(blob);
         
     };
     
-    function parseData(blob,hdr,totalRecord,model) {
+    function parseData(blob,hdr,totalRecord,model,samples) {
         console.log('Reading Data..');
         
         // initialize the scanner with the bytes
-        var _scanner  = new parser.Scanner(blob);
-            
+        var _scanner  = new parser.Scanner(blob),
+            data      = [],
+            numSam    = hdr.samF,
+            indexVal  = 0,
+            temp;
         
-        var data = new Array(hdr.ns);
-	       for (var i = 0;i < hdr.ns;i++) {
-		      data[i] = new Array();
-	       }
+        for(var i = 0;i < hdr.ns;i++) data[i] = [];
+            
         
         _scanner._littleEndian = true // Data is in litte Endian form
         
-        // Reshape array here and then subset of it
-        
-        
-        var numSam,temp;
-        var indexVal = 0;
         for (var i = 0;i < totalRecord;i++) {
             for (var j = 0;j < hdr.ns;j++) {
-                
-                numSam = hdr.samF;
                 temp = _scanner.scan('sshort',numSam);
-                for (var k = 0;k < numSam;k++) {
+                for (var k = 0;k < numSam;k++) 
                     data[j][indexVal + k] = temp[k] * hdr.scaleFac[j] + hdr.dc[j];
-                }	
             }
             indexVal = numSam + i * numSam;
         }
         
+        data = extendArray.subset(data,[':',samples]);
+        
         model.set('data',data);
-        
-        
-        
     }
     
     

@@ -7,13 +7,17 @@ define(function (require) {
         tplText         = require('text!tpl/Data.html'),
         template        = _.template(tplText),
         alertTplText    = require('text!tpl/Alert.html'),
-        alertTemplate   = _.template(alertTplText);
+        alertTemplate   = _.template(alertTplText),
+        extendArray     = require('app/extendArray');
 
     return Backbone.View.extend({
 
         initialize: function (options) {
             this.options = options;
             this.listenTo(this.model, 'change:hdr', this.renderHeader);
+            this.listenTo(this.model, 'change:data', this.renderData);
+            _.bindAll(this, 'on_keypress');
+            $(document).bind('keydown', this.on_keypress);
             this.render();
         },
 
@@ -23,7 +27,7 @@ define(function (require) {
         },
 
         events: {
-            
+            'keyup #dataCont': 'trial'
         },
         
          renderHeader: function() {
@@ -38,6 +42,16 @@ define(function (require) {
              this.options.reader.getData(this.model,0,10);
             
         },
+        
+        renderData: function() {
+            console.log('hi');
+        },
+        
+        on_keypress: function() {
+            console.log('hi');
+        }
+        
+        
     });
 
 });
