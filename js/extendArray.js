@@ -3,12 +3,14 @@ define(function (require) {
     "use strict";
 
         // Function that will return 1D array, used for initializing
-    var fill = function fill(dim, type) {
+    var fill = function fill(dim, type,value) {
         var arr = [], i;
         for (i = 0; i < dim; i++) {
             if (type === 'ones') arr[i] = 1;
             else if (type === 'rands') arr[i] = Math.random();
             else if(type === 'empty') arr[i] = undefined;
+            else if(type === 'custom') arr[i] = value;
+            
             else arr[i] = 0;
         }
         return arr;
@@ -111,16 +113,17 @@ define(function (require) {
         },
         
         // Get array filled with either zeros,ones,empty or random numbers
-        initialize = function (arr,type,check) {
+        initialize = function (arr,type,value,check) {
             if(check === undefined) check=true;
             
             if(check) {
                 if(arr === undefined || arr.length === 0) return [];
-                if(!this.checkArray(arr) || arguments.length > 2) return false;
+                if(!this.checkArray(arr) || arguments.length > 3) return false;
                 if(type !== 'ones' && 
                    type !== 'zeros' && 
                    type !== 'rands' && 
-                   type !== 'empty' && 
+                   type !== 'empty' &&
+                   type !== 'custom' &&
                    type !== 'eye') 
                     return false;
                 
@@ -130,13 +133,13 @@ define(function (require) {
             var newarr = [],dim;
             
             // Base Case
-            if(arr.length === 1) return fill(arr[0],type);
+            if(arr.length === 1) return fill(arr[0],type,value);
             
             // Recursive Case
             else {
                 dim = arr[0];
                 for(var i = 0;i < dim;i++)
-                    newarr[i] = this.initialize(arr.slice(1),type,false);
+                    newarr[i] = this.initialize(arr.slice(1),type,value,false);
             }
             
             return newarr;

@@ -147,14 +147,14 @@ define(function (require) {
             totalBytesNeeded = totalRecord * oneRecord, 
             startByte        = hdr.dataStart + (startRecord * oneRecord + 1), 
             endByte          = startByte + totalBytesNeeded,
-            startSam         = parseInt(from - Math.floor(from) * hdr.samF),
+            startSam         = parseInt(from * hdr.samF - Math.floor(from) * hdr.samF),
             endSam           = startSam + parseInt((to - from) * hdr.samF) - 1,
             samples          = extendArray.serialIndex(startSam,endSam),
             reader           = new FileReader(),
             file             = model.get('file')[0],
             blob;
         
-        model.set('time',extendArray.serialIndex(from,to - 1/hdr.samF,hdr.samF));
+        model.set('time',extendArray.serialIndex(from,to - 1/hdr.samF,1/hdr.samF));
         
         if(endByte > hdr.totalSize) {
             endByte   = file.size;
@@ -190,7 +190,7 @@ define(function (require) {
             indexVal  = 0,
             temp;
         
-        for(var i = 0;i < hdr.ns;i++) data[i] = [];
+        for(var i = 0;i < totalRecord*numSam;i++) data[i] = [];
             
         
         _scanner._littleEndian = true // Data is in litte Endian form
@@ -199,11 +199,11 @@ define(function (require) {
             for (var j = 0;j < hdr.ns;j++) {
                 temp = _scanner.scan('sshort',numSam);
                 for (var k = 0;k < numSam;k++) 
-                    data[j][indexVal + k] = temp[k] * hdr.scaleFac[j] + hdr.dc[j];
+                    data[indexVal + k][j] = temp[k] * hdr.scaleFac[j] + hdr.dc[j];
             }
             indexVal = numSam + i * numSam;
         }
-        data = extendArray.subset(data,[':',samples]);
+        data = extendArray.subset(data,[samples,':']);
         
         model.set('data',data);
         model.set('dataCnt',model.get('dataCnt')+1);

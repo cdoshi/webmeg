@@ -9,7 +9,9 @@ define(function (require) {
         alertTplText    = require('text!tpl/Alert.html'),
         alertTemplate   = _.template(alertTplText),
         extendArray     = require('app/extendArray'),
-        highcharts      = require('Highcharts');
+        highcharts      = require('Highcharts'),
+        dygraph         = require('dygraphs');
+
 
 
     return Backbone.View.extend({
@@ -29,7 +31,6 @@ define(function (require) {
         },
 
         events: {
-            'keyup #dataCont': 'trial',
             'click .back-button' : 'close',
         },
         
@@ -41,11 +42,20 @@ define(function (require) {
          renderHeader: function() {
              var file = this.model.get('file')[0],
                  hdr  = this.model.get('hdr');
-            this.$el.html(template({fileName: file.name,
-                                    samF: hdr.samF,
-                                    ns: hdr.ns,
-                                    units:hdr.units,
-                                    fileSize:(hdr.totalSize/1000000).toFixed(2)}) + alertTemplate());
+             
+             // Set the colors, visibility, status (good or bad) and pass to view to render
+             this.model.set('colors',extendArray.initialize([hdr.ns],'custom','#0072BD'));
+             this.model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
+             this.model.set('good',extendArray.initialize([hdr.ns],'custom',true));
+             
+             this.$el.html(template({fileName: file.name,
+                                     hdr: hdr,
+                                     colors: this.model.get('colors'),
+                                     visible: this.model.get('visible'),
+                                     good:this.model.get('good')
+                                     
+                                    }) + alertTemplate());
+             
              
              this.options.reader.getData(this.model,0,10);
             
@@ -53,31 +63,36 @@ define(function (require) {
         
         renderData: function() {
             var hdr = this.model.get('hdr'),
-                data = this.model.get('data');
-            $('#dataCont').highcharts({
-                chart: {
-                    animation: false
+                data = this.model.get('data'),
+                time = this.model.get('time'),
+                scaling;
+            
+            scaling = extendArray.stat(data,'absmax');
+            data    = extendArray.scalarOperation(data,'divide',scaling[0][0]);
+            
+            
+            for(var i = 0;i < time.length;i++) {
+                data[i].unshift(time[i])
+            }
+            
+            var g = new Dygraph($("#dataCont")[0],data,{
+                rollPeriod: 14,
+                xlabel: 'Time (s)',
+                colors : this.model.get('colors'),
+                showLabelsOnHighlight : false,
+                clickCallback: function(e, p) {
+                    console.log('hi');
                 },
-                xAxis: {
+                pointClickCallback: function(e, p) {
+                    console.log('hi');
                 },
-                legend: {
-                    enabled: false
-                },
-
-                
-                series:(function(){
-                    var d=new Array();
-                    for (var i=0; i<hdr.ns;i++)
-                        d.push({data:data[i],animation:false,color:'#FF0000'});
-                    return d;
-                })(),
-                
-                
-            });
+            });            
         },
         
-        on_keypress: function() {
-            console.log('hi');
+        on_keypress: function(e) {
+            if(e.keyCode === 32) {
+                this.options.reader.getData(this.model,10,20);
+            }
         }
         
         

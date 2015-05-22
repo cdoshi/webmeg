@@ -4,7 +4,7 @@ require.config({
 
     paths: {
         app: '../js',
-        tpl: '../tpl'
+        tpl: '../tpl',
     },
     map: {
         '*': {
@@ -26,7 +26,12 @@ require.config({
         'highcharts': {
             deps: ['jquery'],
             exports: 'Highcharts'
-        }
+        },
+        'dygraphs': {
+            exports: 'Dygraph,DygraphCanvasRenderer,DygraphLayout,DygraphOptions'
+        },
+        
+		
     }
 
 });

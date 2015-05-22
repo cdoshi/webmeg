@@ -14,7 +14,10 @@ define(function (require) {
                 hdrCnt:0,
                 data:[],
                 dataCnt:0,
-                time:[]
+                time:[],
+                colors:[],
+                visibility:[],
+                good:[]
             },
             initialize: function() {
             }

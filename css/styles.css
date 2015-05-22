@@ -60,3 +60,8 @@ html, body {
     background-color: #337ab7;
     color: white
 }
+
+#dataCont {
+    padding-left: 0;
+    padding-right: 0;
+}
