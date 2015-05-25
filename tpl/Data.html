@@ -39,8 +39,17 @@
                     </ul>
                     </a>
                 </li>
-                
-                <li><a href="#" data-toggle="modal" data-target="#chaninfo">Channels</a></li>
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Channels
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#chaninfo">Channel Information</a>
+                        </li>
+                    </ul>
+                    </a>
+                </li>
                 <li><a href="#help">Help</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
@@ -96,8 +105,12 @@
                       <td><%= fileName %></td>
                   </tr>
                   <tr>
-                      <td>Frequency (Hz)</td>
+                      <td>Sampling rate (Hz)</td>
                       <td><%= hdr.samF %></td>
+                  </tr>
+                  <tr>
+                      <td>Length of file (s)</td>
+                      <td><%= hdr.records %></td>
                   </tr>
                   <tr>
                       <td>Number of Channels</td>
@@ -134,23 +147,40 @@
       </div>
         
       <div class="modal-body">
-          <table class="table table-hover">
+          <button type="button" class="btn btn-danger" id="allBad">Mark all as Bad</button>
+          <table class="table table-hover" id="chanTable">
               <thead>
                   <tr>
                       <th>#</th>
                       <th>Name</th>
-                      <th>Color</th>
                       <th>Visible</th>
+                      <th>Good</th>
                   </tr>
               </thead>
               <tbody>
                   <% for(var i = 0;i < hdr.ns;i++) { %>
-                  <tr>
+                  <% if(good[i]) { %>
+                      <tr class="success">
+                    
+                  <% } else { %>
+                      <tr class="danger">
+                  <% } %>
                       <td><%= i+1 %></td>
                       <td><%= hdr.channels[i] %></td>
-                      <td><%= colors[i] %></td>
-                      <td><%= visible[i] %></td>
-                      <td><%= good[i] %></td>
+                      <td>
+                          <% if(visible[i]) { %>
+                              <input type="checkbox" checked>
+                          <% } else { %>
+                              <input type="checkbox">
+                          <% } %>
+                      </td>
+                      <td>
+                          <% if(good[i]) { %>
+                              <input type="checkbox" class="status" checked>
+                          <% } else { %>
+                              <input type="checkbox" class="status">
+                          <% } %>
+                      </td>
                   </tr>
                   <% } %>
                   

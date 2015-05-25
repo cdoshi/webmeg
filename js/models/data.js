@@ -17,7 +17,12 @@ define(function (require) {
                 time:[],
                 colors:[],
                 visibility:[],
-                good:[]
+                good:[],
+                startTime:0, //
+                dataLength:10, // Length of data to be displayed
+                scaling:1,
+                defaultColor:'#0072BD',
+                badColor:'#FF0000'
             },
             initialize: function() {
             }

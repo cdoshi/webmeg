@@ -13,10 +13,6 @@ html, body {
     height: calc(100% - 52px);
 }
 
-#dataCont {
-    height: calc(100% - 52px)
-}
-
 #dragndropMsg {
     top: 50%;
     position: relative
@@ -64,4 +60,9 @@ html, body {
 #dataCont {
     padding-left: 0;
     padding-right: 0;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 52px;
+    bottom: 10px;
 }

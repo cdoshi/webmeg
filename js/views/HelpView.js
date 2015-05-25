@@ -19,7 +19,15 @@ define(function (require) {
         },
 
         events: {
+            'click .back-button' : 'close',
         },
+        
+        close: function() {
+            this.model.set('dataCnt',0);
+            $(document).unbind('keydown', this.on_keypress);
+            this.stopListening(this.model);
+        }
+        
     });
 
 });

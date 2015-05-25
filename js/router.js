@@ -25,7 +25,7 @@ define(function (require) {
         },
         help: function() {
             require(['app/views/HelpView'], function (HelpView) {
-                slider.slidePage(new HelpView().$el);
+                slider.slidePage(new HelpView({model:model}).$el);
             });
         },
         dataview: function() {

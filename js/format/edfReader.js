@@ -138,12 +138,16 @@ define(function (require) {
     }
     
     function getData(model,from,to) {
+        if(from < 0) {
+            from = 0;
+            to = model.get('dataLength');
+        }
         
         var hdr              = model.get('hdr'),
             startRecord      = Math.floor(from),
             endRecord        = Math.ceil(to),
             oneRecord        = hdr.samF * hdr.ns * 2, // 2 is because sshort is 2 bytes long
-            totalRecord      = endRecord - startRecord,
+            totalRecord      = Math.round(model.get('dataLength')),
             totalBytesNeeded = totalRecord * oneRecord, 
             startByte        = hdr.dataStart + (startRecord * oneRecord + 1), 
             endByte          = startByte + totalBytesNeeded,
@@ -154,13 +158,18 @@ define(function (require) {
             file             = model.get('file')[0],
             blob;
         
-        model.set('time',extendArray.serialIndex(from,to - 1/hdr.samF,1/hdr.samF));
+        
         
         if(endByte > hdr.totalSize) {
             endByte   = file.size;
             startByte = endByte - totalBytesNeeded;
             samples   = ':';
+            to        = hdr.records;
+            from      = hdr.records - model.get('dataLength');
+            if(from - model.get('startTime') < 0.0000001) return;
         }
+        
+        model.set('time',extendArray.serialIndex(from,to-1/hdr.samF,1/hdr.samF));
         
         reader.onerror = function(e) {
             console.log(e.target.error.code);
@@ -188,6 +197,7 @@ define(function (require) {
             data      = [],
             numSam    = hdr.samF,
             indexVal  = 0,
+            startTime = model.get('time')[0],
             temp;
         
         for(var i = 0;i < totalRecord*numSam;i++) data[i] = [];
@@ -205,8 +215,13 @@ define(function (require) {
         }
         data = extendArray.subset(data,[samples,':']);
         
-        model.set('data',data);
-        model.set('dataCnt',model.get('dataCnt')+1);
+        
+        if(model.get('dataCnt') === 0)
+            model.set('scaling',extendArray.stat(extendArray.serialize(extendArray.stat(data,'absmax')),'absmax')[0]);
+        
+        data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
+        
+        model.set({'data':data,'dataCnt':model.get('dataCnt')+1,'startTime':startTime});
     }
     
     

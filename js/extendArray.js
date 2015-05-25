@@ -765,6 +765,7 @@ define(function (require) {
         subset          : subset,
         determinant     : determinant,
         serialIndex     : serialIndex,
+        serialize       : serialize,
         inverse         : inverse,
         pseudoinverse   : pseudoinverse,
         adjoint         : adjoint,
