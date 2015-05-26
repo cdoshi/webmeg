@@ -111,25 +111,26 @@ define(function (require) {
         },
         
          renderHeader: function() {
-             var file = this.model.get('file')[0],
-                 hdr  = this.model.get('hdr'),
-                 from = this.model.get('startTime'),
-                 to   = from + this.model.get('dataLength');
+             var model =  this.model;
+                 file  = model.get('file')[0],
+                 hdr   = model.get('hdr'),
+                 from  = model.get('startTime'),
+                 to    = from + model.get('dataLength');
              
              // Set the colors, visibility, status (good or bad) and pass to view to render
-             this.model.set('colors',extendArray.initialize([hdr.ns],'custom',this.model.get('defaultColor')));
-             this.model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
-             this.model.set('good',extendArray.initialize([hdr.ns],'custom',true));
+             model.set('colors',extendArray.initialize([hdr.ns],'custom',model.get('defaultColor')));
+             model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
+             model.set('good',extendArray.initialize([hdr.ns],'custom',true));
              
              this.$el.html(template({fileName: file.name,
                                      hdr: hdr,
-                                     colors: this.model.get('colors'),
-                                     visible: this.model.get('visible'),
-                                     good:this.model.get('good')
+                                     colors: model.get('colors'),
+                                     visible: model.get('visible'),
+                                     good:model.get('good')
                                     }) + alertTemplate());
              
              
-             this.options.reader.getData(this.model,from,to);
+             this.options.reader.getData(model,from,to);
             
         },
         
