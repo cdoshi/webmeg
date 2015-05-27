@@ -22,7 +22,8 @@ define(function (require) {
                 dataLength:10, // Length of data to be displayed
                 scaling:1,
                 defaultColor:'#0072BD',
-                badColor:'#FF0000'
+                badColor:'#FF0000',
+                highlightColor:'#00FF00'
             },
             initialize: function() {
             }

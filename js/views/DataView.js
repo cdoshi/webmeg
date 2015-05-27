@@ -35,9 +35,12 @@ define(function (require) {
         events: {
             'click .back-button' : 'close',
             'click .status'      : 'changeStatus',
-            'click #allBad'      : 'markAllBad',
-            'click #allGood'     : 'markAllGood',
-            
+            'click .visible'     : 'changeVisible',
+            'click #allBad'      : 'markAll',
+            'click #someBad'     : 'markSome',
+            'click #allGood'     : 'markAll',
+            'click #someGood'    : 'markSome',
+            'click #hideBad'     : 'hideBad'
         },
         
         close: function() {
@@ -46,23 +49,36 @@ define(function (require) {
             this.stopListening(this.model);
         },
         
-        changeColor: function(chan,update,color) {
+        changeColor: function(chan,update,type,color) {
             var model = this.model,
-                hdr   = model.get('hdr'),
-                index = hdr.channels.indexOf(chan);
+                hdr = model.get('hdr'),
+                chanIndex = hdr.channels.indexOf(chan),
+                index = g.user_attrs_.labels.indexOf(chan) - 1,
+                allColors = model.get('colors');
             
             
-            if(color === undefined) {
+            if(color === undefined && type === 'bad') {
                 color = (g.user_attrs_.colors[index] === model.get('badColor')) ? 
                     model.get('defaultColor') : 
                     model.get('badColor');
+            }
+            else if(color === undefined && type === 'highlight') {
+                if(model.get('good')[chanIndex] && g.user_attrs_.colors[index] === model.get('highlightColor')) {
+                    color = model.get('defaultColor');
+                } 
+                else if(!model.get('good')[chanIndex] && g.user_attrs_.colors[index] === model.get('highlightColor')) {
+                    color = model.get('badColor');
+                }
+                else {
+                    color = model.get('highlightColor');
+                }
             }
             
             g.colorsMap_[chan] = color;
             if(update) g.updateOptions({});
             g.user_attrs_.colors[index] = color;
             Dygraph.updateDeep(g.user_attrs_, g.user_attrs_);
-            model.set('colors',g.user_attrs_.colors);
+            allColors[chanIndex] = color;
         },
         
         changeStatus: function(e) {
@@ -81,33 +97,83 @@ define(function (require) {
                 good[index] = false;
             }   
             
-            this.changeColor(chan,true);
+            this.changeColor(chan,true,'bad');
         },
         
-        markAllBad: function(e) {
+        changeVisible: function(e) {
+            var row     = $(e.target).parent().parent(),
+                chan    = $(row.find('.channel')).html(),
+                hdr     = this.model.get('hdr'),
+                index   = hdr.channels.indexOf(chan),
+                visible = this.model.get('good');
+            
+            if($(e.target).is(':checked'))
+                visible[index] = true;
+            else
+                visible[index] = false;
+            
+            g.setVisibility(index,visible[index]);
+            
+        },
+        
+        markSome: function(e) {
             var that  = this,
-                good  = this.model.get('good');
-            $("#chanTable").find('.status').removeAttr('checked');
-            $.each($("#chanTable > tbody > tr"),function(index,value) {
-                good[index] = false;
-                $(value).removeClass().addClass('danger');
-                that.changeColor($(value).find('.channel').html(),false,that.model.get('badColor'));
+                model = this.model,
+                good  = model.get('good'),
+                hdr   = model.get('hdr'),
+                row,
+                status,
+                chan,
+                chanIndex;
+            
+            g.user_attrs_.colors.forEach(function(value,index) {
+                if(value === that.model.get('highlightColor')) {
+                    chan = g.user_attrs_.labels[index+1];
+                    chanIndex = hdr.channels.indexOf(chan);
+                    row = $('#chanTable tr:contains(' + chan + ')');
+                    status = row.find('.status');
+                    if(good[chanIndex]) {
+                        good[chanIndex] = false;
+                        row.removeClass().addClass('danger');
+                        status.removeAttr('checked');
+                        that.changeColor(g.user_attrs_.labels[index+1],false,'bad',that.model.get('badColor'));
+                    } else {
+                        good[chanIndex] = true;
+                        row.removeClass().addClass('success');
+                        status.prop('checked','checked');
+                        that.changeColor(g.user_attrs_.labels[index+1],false,'bad',that.model.get('defaultColor'));
+                    }
+                }
             });
             g.updateOptions({});
         },
         
-        markAllGood: function(e) {
+        markAll: function(e) {
             var that  = this,
                 good  = this.model.get('good'),
                 status;
             
-            $.each($("#chanTable > tbody > tr"),function(index,value) {
-                $(value).find('.status').prop('checked','checked');
-                good[index] = true;
-                $(value).removeClass().addClass('success');
-                that.changeColor($(value).find('.channel').html(),false,that.model.get('defaultColor'));
-            });
+            if($(e.toElement).hasClass('btn-danger')) {
+                $.each($("#chanTable > tbody > tr"),function(index,value) {
+                    $(value).find('.status').removeAttr('checked');
+                    good[index] = false;
+                    $(value).removeClass().addClass('danger');
+                    that.changeColor($(value).find('.channel').html(),false,'bad',that.model.get('badColor'));
+                });
+            }
+            else {
+                $.each($("#chanTable > tbody > tr"),function(index,value) {
+                    $(value).find('.status').prop('checked','checked');
+                    good[index] = true;
+                    $(value).removeClass().addClass('success');
+                    that.changeColor($(value).find('.channel').html(),false,'bad',that.model.get('defaultColor'));
+                });
+            }
             g.updateOptions({});
+        },
+        
+        hideBad: function(e) {
+            
         },
         
          renderHeader: function() {
@@ -158,26 +224,7 @@ define(function (require) {
                     colors : model.get('colors'),
                     showLabelsOnHighlight : false,
                     pointClickCallback: function(e, p) {
-                        that.changeColor(p.name,true);
-                        var row = $('#chanTable tr:contains(' + p.name + ')'),
-                            status = row.find('.status'),
-                            model = that.model,
-                            hdr   = model.get('hdr'),
-                            good  = model.get('good'),
-                            index  = hdr.channels.indexOf(p.name);
-                        
-                        if(status.is(':checked')) status.removeAttr('checked');
-                        else status.prop('checked','checked')
-                        
-                        if(row.hasClass('danger')) {
-                            row.removeClass().addClass('success');
-                            good[index] = true;
-                        }
-                        else {
-                            row.removeClass().addClass('danger');
-                            good[index] = false;
-                        }
-                            
+                        that.changeColor(p.name,true,'highlight');   
                     },
                     labels: channel,
                 });
@@ -185,22 +232,23 @@ define(function (require) {
             else {
                 g.updateOptions({file: data});
             }
-            
-            
         },
         
         on_keypress: function(e) {
             var time = this.model.get('time'),
                 hdr  = this.model.get('hdr');
-            if(e.keyCode === 39) {
+            if(e.keyCode === 39) { // Right Button
                 var from = time[time.length-1]+1/hdr.samF,
                     to   = from + this.model.get('dataLength');
                 this.options.reader.getData(this.model,from,to);
             }
-            else if(e.keyCode === 37) {
+            else if(e.keyCode === 37) { // Left Button
                 var to   = time[0],
                     from = to - this.model.get('dataLength');
                 this.options.reader.getData(this.model,from,to);
+            }
+            else if(e.keyCode === 46) { // Delete
+                this.markSome();
             }
         }
         

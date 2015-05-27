@@ -148,7 +148,10 @@
         
       <div class="modal-body">
           <button type="button" class="btn btn-danger" id="allBad">Mark all as Bad</button>
+          <button type="button" class="btn btn-danger" id="someBad">Mark selected as Bad</button>
           <button type="button" class="btn btn-success" id="allGood">Mark all as Good</button>
+          <button type="button" class="btn btn-success" id="someGood">Mark selected as Good</button>
+          <button type="button" class="btn btn-info" id="hideBad">Hide Bad Channels</button>
           <table class="table table-hover" id="chanTable">
               <thead>
                   <tr>
@@ -170,9 +173,9 @@
                       <td class="channel"><%= hdr.channels[i] %></td>
                       <td>
                           <% if(visible[i]) { %>
-                              <input type="checkbox" checked>
+                              <input type="checkbox" class="visible" checked>
                           <% } else { %>
-                              <input type="checkbox">
+                              <input type="checkbox" class="visible">
                           <% } %>
                       </td>
                       <td>
