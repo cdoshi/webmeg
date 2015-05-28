@@ -13,6 +13,12 @@ html, body {
     height: calc(100% - 52px);
 }
 
+#alertDiv > .modal-dialog > .modal-content > .modal-header {
+    background-color:#d9534f;
+    color: white;
+    border-bottom-color: #d9534f
+}
+
 #dragndropMsg {
     top: 50%;
     position: relative
@@ -22,10 +28,6 @@ html, body {
     opacity: 0;
     z-index: 1;
     position: absolute
-}
-
-.alert {
-    margin-bottom: 0
 }
 
 .modal-backdrop.in {

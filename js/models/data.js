@@ -23,7 +23,9 @@ define(function (require) {
                 scaling:1,
                 defaultColor:'#0072BD',
                 badColor:'#FF0000',
-                highlightColor:'#00FF00'
+                highlightColor:'#00FF00',
+                annotation:[],
+                evType:[]
             },
             initialize: function() {
             }

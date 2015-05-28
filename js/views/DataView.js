@@ -40,7 +40,8 @@ define(function (require) {
             'click #someBad'     : 'markSome',
             'click #allGood'     : 'markAll',
             'click #someGood'    : 'markSome',
-            'click #hideBad'     : 'hideBad'
+            'click #hideBad'     : 'hideBad',
+            'click #evType'      : 'crNewEvtType'
         },
         
         close: function() {
@@ -54,19 +55,19 @@ define(function (require) {
                 hdr = model.get('hdr'),
                 chanIndex = hdr.channels.indexOf(chan),
                 index = g.user_attrs_.labels.indexOf(chan) - 1,
-                allColors = model.get('colors');
-            
+                allColors = model.get('colors'),
+                good = model.get('good');
             
             if(color === undefined && type === 'bad') {
-                color = (g.user_attrs_.colors[index] === model.get('badColor')) ? 
+                color = (allColors[chanIndex] === model.get('badColor')) ? 
                     model.get('defaultColor') : 
                     model.get('badColor');
             }
             else if(color === undefined && type === 'highlight') {
-                if(model.get('good')[chanIndex] && g.user_attrs_.colors[index] === model.get('highlightColor')) {
+                if(good[chanIndex] && allColors[chanIndex] === model.get('highlightColor')) {
                     color = model.get('defaultColor');
                 } 
-                else if(!model.get('good')[chanIndex] && g.user_attrs_.colors[index] === model.get('highlightColor')) {
+                else if(!good[chanIndex] && allColors[chanIndex] === model.get('highlightColor')) {
                     color = model.get('badColor');
                 }
                 else {
@@ -74,11 +75,15 @@ define(function (require) {
                 }
             }
             
-            g.colorsMap_[chan] = color;
-            if(update) g.updateOptions({});
-            g.user_attrs_.colors[index] = color;
-            Dygraph.updateDeep(g.user_attrs_, g.user_attrs_);
             allColors[chanIndex] = color;
+            
+            if(index >= 0) {
+                g.colorsMap_[chan] = color;
+                if(update) g.updateOptions({});
+                g.user_attrs_.colors[index] = color;
+                Dygraph.updateDeep(g.user_attrs_, g.user_attrs_);
+            }
+            
         },
         
         changeStatus: function(e) {
@@ -105,17 +110,20 @@ define(function (require) {
                 chan    = $(row.find('.channel')).html(),
                 hdr     = this.model.get('hdr'),
                 index   = hdr.channels.indexOf(chan),
-                visible = this.model.get('good');
+                visible = this.model.get('good'),
+                index1  = g.user_attrs_.labels.indexOf(chan) - 1;
             
             if($(e.target).is(':checked'))
                 visible[index] = true;
             else
                 visible[index] = false;
             
-            g.setVisibility(index,visible[index]);
+            if(index1 >= 0)
+                g.setVisibility(index,visible[index]);
             
         },
         
+        // Mark some of the selected channels as bad or good
         markSome: function(e) {
             var that  = this,
                 model = this.model,
@@ -148,6 +156,7 @@ define(function (require) {
             g.updateOptions({});
         },
         
+        // Mark all as either good or bad channels
         markAll: function(e) {
             var that  = this,
                 good  = this.model.get('good'),
@@ -173,11 +182,38 @@ define(function (require) {
         },
         
         hideBad: function(e) {
+            var labels  = g.user_attrs_.labels,
+                visible = this.model.get('visible'),
+                good    = this.model.get('good'),
+                chan,
+                chanIndex;
             
+            $.each($("#chanTable > tbody > tr"),function(index,value) {
+                chan = $(value).find('.channel').html();
+                
+                if(visible[index] && !good[index]) {
+                    visible[index] = false;
+                    $(value).find('.visible').removeAttr('checked');
+                    chanIndex = labels.indexOf(chan) - 1;
+                    if(chanIndex >=0)
+                        g.setVisibility(index,visible[index]);
+                }
+            });
+                
+        },
+        
+        // Create new event type
+        crNewEvtType: function(e) {
+            var evType = this.model.get('evType'),
+                name   = $("#crEvModal input").val().trim();
+            
+            if(evType.indexOf(name) < 0) {
+                console.log('hi');
+            }
         },
         
          renderHeader: function() {
-             var model =  this.model;
+             var model =  this.model,
                  file  = model.get('file')[0],
                  hdr   = model.get('hdr'),
                  from  = model.get('startTime'),
@@ -220,6 +256,7 @@ define(function (require) {
                 if (g) { g.destroy(); }
                 g = new Dygraph($("#dataCont")[0],data,{
                     xlabel: 'Time (s)',
+                    displayAnnotations:true,
                     digitsAfterDecimal : 6,
                     colors : model.get('colors'),
                     showLabelsOnHighlight : false,
@@ -249,6 +286,7 @@ define(function (require) {
             }
             else if(e.keyCode === 46) { // Delete
                 this.markSome();
+                this.hideBad();
             }
         }
         
