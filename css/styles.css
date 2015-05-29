@@ -68,3 +68,19 @@ html, body {
     top: 52px;
     bottom: 10px;
 }
+
+.xline {
+    top:0px;
+    visibility: hidden;
+    height:100%;
+    width:2px;
+    position: absolute;
+    background-color: red
+}
+
+#legend {
+    visibility: hidden;
+    position: absolute;
+    right:0;
+    top:0
+}

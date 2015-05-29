@@ -22,7 +22,7 @@ define(function (require) {
             this.listenTo(this.model, 'change:hdrCnt', this.renderHeader);
             this.listenTo(this.model, 'change:dataCnt', this.renderData);
             _.bindAll(this, 'on_keypress');
-             _.bindAll(this, "changeColor");
+            _.bindAll(this, "changeColor");
             $(document).bind('keydown', this.on_keypress);
             this.render();
         },
@@ -41,6 +41,7 @@ define(function (require) {
             'click #allGood'     : 'markAll',
             'click #someGood'    : 'markSome',
             'click #hideBad'     : 'hideBad',
+            'click #resetSelect' : 'resetSelection',
             'click #evType'      : 'crNewEvtType'
         },
         
@@ -51,12 +52,12 @@ define(function (require) {
         },
         
         changeColor: function(chan,update,type,color) {
-            var model = this.model,
-                hdr = model.get('hdr'),
+            var model     = this.model,
+                hdr       = model.get('hdr'),
                 chanIndex = hdr.channels.indexOf(chan),
-                index = g.user_attrs_.labels.indexOf(chan) - 1,
+                index     = g.user_attrs_.labels.indexOf(chan) - 1,
                 allColors = model.get('colors'),
-                good = model.get('good');
+                good      = model.get('good');
             
             if(color === undefined && type === 'bad') {
                 color = (allColors[chanIndex] === model.get('badColor')) ? 
@@ -73,6 +74,10 @@ define(function (require) {
                 else {
                     color = model.get('highlightColor');
                 }
+            }
+            else if(color === undefined && type === 'reset') {
+                if(good[chanIndex]) color = model.get('defaultColor');
+                else color = model.get('badColor');
             }
             
             allColors[chanIndex] = color;
@@ -151,6 +156,24 @@ define(function (require) {
                         status.prop('checked','checked');
                         that.changeColor(g.user_attrs_.labels[index+1],false,'bad',that.model.get('defaultColor'));
                     }
+                }
+            });
+            g.updateOptions({});
+        },
+        
+        resetSelection: function(e) {
+            var that  = this,
+                model = this.model,
+                good  = model.get('good'),
+                hdr   = model.get('hdr'),
+                row,
+                status,
+                chan,
+                chanIndex;
+            
+            g.user_attrs_.colors.forEach(function(value,index) {
+                if(value === that.model.get('highlightColor')) {
+                    that.changeColor(g.user_attrs_.labels[index+1],false,'reset');
                 }
             });
             g.updateOptions({});
@@ -238,21 +261,23 @@ define(function (require) {
         
         renderData: function() {
             if(this.model.get('dataCnt') === 0) return;
-            var model = this.model,
-                hdr = this.model.get('hdr'),
-                data = extendArray.scalarOperation(this.model.get('data'),'copy'),
-                time = this.model.get('time'),
-                scaling,
-                channel = hdr.channels.slice();
+            var model  = this.model,
+                hdr    = this.model.get('hdr'),
+                data   = extendArray.scalarOperation(this.model.get('data'),'copy'),
+                time   = this.model.get('time'),
+                labels = hdr.channels.slice();
             
-           channel.unshift("Time");
+           labels.unshift("Time");
             
             for(var i = 0;i < time.length;i++) {
                 data[i].unshift(time[i])
             }
             
             if(this.model.get('dataCnt') === 1) {
-                var that = this;
+                var that = this,
+                    xline,
+                    legend,
+                    triggerclick=true;
                 if (g) { g.destroy(); }
                 g = new Dygraph($("#dataCont")[0],data,{
                     xlabel: 'Time (s)',
@@ -261,19 +286,55 @@ define(function (require) {
                     colors : model.get('colors'),
                     showLabelsOnHighlight : false,
                     pointClickCallback: function(e, p) {
-                        that.changeColor(p.name,true,'highlight');   
+                        var value = p.yval * that.model.get('scaling');
+                        that.changeColor(p.name,true,'highlight');
+                        $('.xline').css({'visibility':'visible','left':p.canvasx});
+                        $('#legend').html('Time:' + p.xval.toFixed(4) + 's;' 
+                                          + p.name + ':' + value.toFixed(2) + model.get('hdr').units);
+                        $('#legend').css({'visibility':'visible'});
+                        triggerclick = false;
+                        
+                        
                     },
-                    labels: channel,
+                    clickCallback: function(e,x,pts) {
+                        if(triggerclick) {
+                            if(pts.length > 0) {
+                                $('.xline').css({'visibility':'visible','left':pts[0].canvasx});
+                                $('#legend').html('Time:' + pts[0].xval.toFixed(4) + 's');
+                                $('#legend').css({'visibility':'visible'});
+                            }
+                        }
+                        triggerclick = true;
+                    },
+                    zoomCallback: function() {
+                        $('.xline').css({'visibility':'hidden'});
+                    },
+                    labels: labels,
                 });
+                
+                // Create line marker
+                xline = document.createElement("div");
+                xline.className = "xline";
+                $("#dataCont")[0].appendChild(xline);
+                
+                // Create legend box
+                legend = document.createElement("div");
+                legend.id = "legend";
+                $("#dataCont")[0].appendChild(legend);
+                
+                
             }
             else {
+                g.resetZoom();
                 g.updateOptions({file: data});
             }
+            
         },
         
         on_keypress: function(e) {
             var time = this.model.get('time'),
                 hdr  = this.model.get('hdr');
+            
             if(e.keyCode === 39) { // Right Button
                 var from = time[time.length-1]+1/hdr.samF,
                     to   = from + this.model.get('dataLength');
@@ -288,9 +349,7 @@ define(function (require) {
                 this.markSome();
                 this.hideBad();
             }
-        }
-        
-        
+        }    
     });
 
 });

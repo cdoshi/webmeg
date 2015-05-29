@@ -57,7 +57,6 @@
 </nav>
 
 <div class="container-fluid" id="dataCont">
-    
 </div>
 
 <!-- Create Event modal -->
@@ -148,11 +147,15 @@
       </div>
         
       <div class="modal-body">
-          <button type="button" class="btn btn-danger" id="allBad">Mark all as Bad</button>
-          <button type="button" class="btn btn-danger" id="someBad">Mark selected as Bad</button>
-          <button type="button" class="btn btn-success" id="allGood">Mark all as Good</button>
-          <button type="button" class="btn btn-success" id="someGood">Mark selected as Good</button>
-          <button type="button" class="btn btn-info" id="hideBad">Hide Bad Channels</button>
+          <div class="btn-group">
+              <button type="button" class="btn btn-danger btn-sm" id="allBad">Mark all as Bad</button>
+              <button type="button" class="btn btn-success btn-sm" id="allGood">Mark all as Good</button>
+              <button type="button" class="btn btn-danger btn-sm" id="someBad">Mark selected as Bad</button>
+              <button type="button" class="btn btn-success btn-sm" id="someGood">Mark selected as Good</button>
+              <button type="button" class="btn btn-info btn-sm" id="hideBad">Hide Bad Channels</button>
+              <button type="button" class="btn btn-info btn-sm" id="resetSelect">Reset Selection</button>
+          </div>
+          
           <table class="table table-hover" id="chanTable">
               <thead>
                   <tr>

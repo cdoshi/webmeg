@@ -215,7 +215,6 @@ define(function (require) {
         }
         data = extendArray.subset(data,[samples,':']);
         
-        
         if(model.get('dataCnt') === 0)
             model.set('scaling',extendArray.stat(extendArray.serialize(extendArray.stat(data,'absmax')),'absmax')[0]);
         
