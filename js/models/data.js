@@ -20,12 +20,13 @@ define(function (require) {
                 good:[],
                 startTime:0, //
                 dataLength:10, // Length of data to be displayed
-                scaling:1,
+                scaling:0,
                 defaultColor:'#0072BD',
                 badColor:'#FF0000',
                 highlightColor:'#00FF00',
                 annotation:[],
-                evType:[]
+                evType:[],
+                typePlot:'stacked'
             },
             initialize: function() {
             }

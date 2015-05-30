@@ -11,7 +11,9 @@ define(function (require) {
         extendArray     = require('app/extendArray'),
         highcharts      = require('Highcharts'),
         dygraph         = require('dygraphs'),
+        triggerClick    = true,
         g;
+        
 
 
 
@@ -23,6 +25,9 @@ define(function (require) {
             this.listenTo(this.model, 'change:dataCnt', this.renderData);
             _.bindAll(this, 'on_keypress');
             _.bindAll(this, "changeColor");
+            _.bindAll(this, "pointClickCallback");
+            _.bindAll(this, "clickCallback");
+            _.bindAll(this, "addEls");
             $(document).bind('keydown', this.on_keypress);
             this.render();
         },
@@ -42,7 +47,8 @@ define(function (require) {
             'click #someGood'    : 'markSome',
             'click #hideBad'     : 'hideBad',
             'click #resetSelect' : 'resetSelection',
-            'click #evType'      : 'crNewEvtType'
+            'click #evType'      : 'crNewEvtType',
+            'click #resetZoom'   : function() { g.resetZoom();}
         },
         
         close: function() {
@@ -89,6 +95,39 @@ define(function (require) {
                 Dygraph.updateDeep(g.user_attrs_, g.user_attrs_);
             }
             
+        },
+        
+        pointClickCallback: function(e, p) {
+            var value = p.yval * this.model.get('scaling');
+            this.changeColor(p.name,true,'highlight');
+            $('.xline').css({'visibility':'visible','left':p.canvasx});
+            $('#legend').html('Time:' + p.xval.toFixed(4) + 's;' 
+                              + p.name + ':' + value.toFixed(2) + this.model.get('hdr').units);
+            $('#legend').css({'visibility':'visible'});
+            triggerClick = false;
+        },
+        
+        clickCallback: function(e,x,pts) {
+            if(triggerClick) {
+                if(pts.length > 0) {
+                    $('.xline').css({'visibility':'visible','left':pts[0].canvasx});
+                    $('#legend').html('Time:' + pts[0].xval.toFixed(4) + 's');
+                    $('#legend').css({'visibility':'visible'});
+                }
+            }
+            triggerClick = true;
+        },
+        
+        addEls: function() {
+            // Create line marker
+            var xline  = document.createElement("div"),
+                legend = document.createElement("div");
+            xline.className = "xline";
+            $("#dataCont")[0].appendChild(xline);
+
+            // Create legend box
+            legend.id = "legend";
+            $("#dataCont")[0].appendChild(legend);
         },
         
         changeStatus: function(e) {
@@ -259,6 +298,7 @@ define(function (require) {
             
         },
         
+        
         renderData: function() {
             if(this.model.get('dataCnt') === 0) return;
             var model  = this.model,
@@ -269,60 +309,42 @@ define(function (require) {
             
            labels.unshift("Time");
             
+            if(model.get('scaling') === 0) {
+                model.set('scaling',extendArray.stat(extendArray.serialize(extendArray.stat(data,'absmax')),'absmax')[0]);
+            }
+            
+            data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
+            
+            if(model.get('typePlot') === 'stacked') {
+                var addOffset = extendArray.serialIndex(1,hdr.ns);
+                for(var i = 0;i < data.length;i++) {
+                    data[i] = extendArray.dotOperation(data[i],addOffset,'add');
+                }
+            }
+            
             for(var i = 0;i < time.length;i++) {
                 data[i].unshift(time[i])
             }
             
-            if(this.model.get('dataCnt') === 1) {
-                var that = this,
-                    xline,
-                    legend,
-                    triggerclick=true;
+            if(model.get('dataCnt') === 1) {
+                
                 if (g) { g.destroy(); }
                 g = new Dygraph($("#dataCont")[0],data,{
                     xlabel: 'Time (s)',
+                    ylabel: 'Amplitude (' + hdr.units + ')',
                     displayAnnotations:true,
                     digitsAfterDecimal : 6,
                     colors : model.get('colors'),
                     showLabelsOnHighlight : false,
-                    pointClickCallback: function(e, p) {
-                        var value = p.yval * that.model.get('scaling');
-                        that.changeColor(p.name,true,'highlight');
-                        $('.xline').css({'visibility':'visible','left':p.canvasx});
-                        $('#legend').html('Time:' + p.xval.toFixed(4) + 's;' 
-                                          + p.name + ':' + value.toFixed(2) + model.get('hdr').units);
-                        $('#legend').css({'visibility':'visible'});
-                        triggerclick = false;
-                        
-                        
-                    },
-                    clickCallback: function(e,x,pts) {
-                        if(triggerclick) {
-                            if(pts.length > 0) {
-                                $('.xline').css({'visibility':'visible','left':pts[0].canvasx});
-                                $('#legend').html('Time:' + pts[0].xval.toFixed(4) + 's');
-                                $('#legend').css({'visibility':'visible'});
-                            }
-                        }
-                        triggerclick = true;
-                    },
+                    pointClickCallback: this.pointClickCallback,
+                    clickCallback: this.clickCallback,
                     zoomCallback: function() {
                         $('.xline').css({'visibility':'hidden'});
                     },
                     labels: labels,
                 });
                 
-                // Create line marker
-                xline = document.createElement("div");
-                xline.className = "xline";
-                $("#dataCont")[0].appendChild(xline);
-                
-                // Create legend box
-                legend = document.createElement("div");
-                legend.id = "legend";
-                $("#dataCont")[0].appendChild(legend);
-                
-                
+                g.ready(this.addEls());
             }
             else {
                 g.resetZoom();
@@ -335,16 +357,27 @@ define(function (require) {
             var time = this.model.get('time'),
                 hdr  = this.model.get('hdr');
             
-            if(e.keyCode === 39) { // Right Button
-                var from = time[time.length-1]+1/hdr.samF,
-                    to   = from + this.model.get('dataLength');
-                this.options.reader.getData(this.model,from,to);
-            }
-            else if(e.keyCode === 37) { // Left Button
+            
+            if(e.keyCode === 37) { // Left Button
                 var to   = time[0],
                     from = to - this.model.get('dataLength');
                 this.options.reader.getData(this.model,from,to);
             }
+            
+            else if(e.keyCode === 38) { // Up Button
+                g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
+            }
+            
+            else if(e.keyCode === 39) { // Right Button
+                var from = time[time.length-1]+1/hdr.samF,
+                    to   = from + this.model.get('dataLength');
+                this.options.reader.getData(this.model,from,to);
+            }
+            
+            else if(e.keyCode === 40) { // Down Button
+                g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
+            }
+            
             else if(e.keyCode === 46) { // Delete
                 this.markSome();
                 this.hideBad();

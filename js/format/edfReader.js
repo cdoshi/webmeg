@@ -215,11 +215,6 @@ define(function (require) {
         }
         data = extendArray.subset(data,[samples,':']);
         
-        if(model.get('dataCnt') === 0)
-            model.set('scaling',extendArray.stat(extendArray.serialize(extendArray.stat(data,'absmax')),'absmax')[0]);
-        
-        data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
-        
         model.set({'data':data,'dataCnt':model.get('dataCnt')+1,'startTime':startTime});
     }
     

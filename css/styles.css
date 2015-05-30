@@ -75,12 +75,14 @@ html, body {
     height:100%;
     width:2px;
     position: absolute;
-    background-color: red
+    background-color: red;
+    z-index:-1
 }
 
 #legend {
     visibility: hidden;
     position: absolute;
     right:0;
-    top:0
+    top:0;
+    z-index:-1
 }
