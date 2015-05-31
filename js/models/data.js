@@ -26,7 +26,7 @@ define(function (require) {
                 highlightColor:'#00FF00',
                 annotation:[],
                 evType:[],
-                typePlot:'stacked'
+                typePlot:'Stacked'
             },
             initialize: function() {
             }

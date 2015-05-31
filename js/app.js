@@ -23,10 +23,6 @@ require.config({
         'bootstrap': { 
             deps: ['jquery'] 
         }, 
-        'highcharts': {
-            deps: ['jquery'],
-            exports: 'Highcharts'
-        },
         'dygraphs': {
             exports: 'Dygraph,DygraphCanvasRenderer,DygraphLayout,DygraphOptions'
         },

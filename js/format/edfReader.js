@@ -149,7 +149,7 @@ define(function (require) {
             oneRecord        = hdr.samF * hdr.ns * 2, // 2 is because sshort is 2 bytes long
             totalRecord      = Math.round(model.get('dataLength')),
             totalBytesNeeded = totalRecord * oneRecord, 
-            startByte        = hdr.dataStart + (startRecord * oneRecord + 1), 
+            startByte        = hdr.dataStart + (startRecord * oneRecord), 
             endByte          = startByte + totalBytesNeeded,
             startSam         = parseInt(from * hdr.samF - Math.floor(from) * hdr.samF),
             endSam           = startSam + parseInt((to - from) * hdr.samF) - 1,

@@ -9,27 +9,28 @@ define(function (require) {
         alertTplText    = require('text!tpl/Alert.html'),
         alertTemplate   = _.template(alertTplText),
         extendArray     = require('app/extendArray'),
-        highcharts      = require('Highcharts'),
         dygraph         = require('dygraphs'),
         triggerClick    = true,
         g;
         
-
-
-
     return Backbone.View.extend({
 
         initialize: function (options) {
             this.options = options;
             this.listenTo(this.model, 'change:hdrCnt', this.renderHeader);
-            this.listenTo(this.model, 'change:dataCnt', this.renderData);
-            _.bindAll(this, 'on_keypress');
+            this.listenTo(this.model, 'change:dataCnt',_.throttle(this.renderData, 500,{leading: false}));
+            this.listenTo(this.model, 'change:scaling',_.throttle(this.renderData, 500,{leading: false}));
+            _.bindAll(this, "on_keypress");
             _.bindAll(this, "changeColor");
             _.bindAll(this, "pointClickCallback");
             _.bindAll(this, "clickCallback");
             _.bindAll(this, "addEls");
+            _.bindAll(this, "plotStacked");
+            _.bindAll(this, "plotButterfly");
             $(document).bind('keydown', this.on_keypress);
+            if(g) g.destroy();
             this.render();
+            
         },
 
         render: function () {
@@ -48,11 +49,80 @@ define(function (require) {
             'click #hideBad'     : 'hideBad',
             'click #resetSelect' : 'resetSelection',
             'click #evType'      : 'crNewEvtType',
-            'click #resetZoom'   : function() { g.resetZoom();}
+            'click #resetZoom'   : function() { g.resetZoom();},
+            'click #plotType'    : 'plotType'
+        },
+        
+        plotType: function(e) {
+            var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
+            $(e.target).html(type);
+            this.model.set('typePlot',type);
+            g.destroy();
+            this.renderData();
+        },
+        
+        plotStacked: function(data,labels) {
+            var model = this.model,
+                hdr   = model.get('hdr'),
+                ticks = [];
+            
+            for(var i = 0;i < hdr.ns;i++) ticks.push({v:i+1,label:hdr.channels[i]});
+            
+            if(g) g.destroy();
+            
+            g = new Dygraph($("#dataCont")[0],data,{
+                xlabel: 'Time (s)',
+                displayAnnotations: true,
+                digitsAfterDecimal : 6,
+                colors: model.get('colors'),
+                valueRange: [0,hdr.ns+1],
+                showLabelsOnHighlight : false,
+                pointClickCallback: this.pointClickCallback,
+                clickCallback: this.clickCallback,
+                zoomCallback: function() {
+                    $('.xline').css({'visibility':'hidden'});
+                },
+                labels: labels,
+                axes: {
+                    y: {
+                        ticker: function() {
+                            return ticks;
+                        }
+                    }
+                }
+            });
+
+            g.ready(this.addEls);
+            
+            
+        },
+        
+        plotButterfly: function(data,labels) {
+            var model = this.model,
+                hdr   = model.get('hdr');
+            
+            if(g) g.destroy();
+                
+            g = new Dygraph($("#dataCont")[0],data,{
+                xlabel: 'Time (s)',
+                ylabel: 'Amplitude (' + hdr.units + ')',
+                displayAnnotations:true,
+                digitsAfterDecimal : 6,
+                colors : model.get('colors'),
+                showLabelsOnHighlight : false,
+                pointClickCallback: this.pointClickCallback,
+                clickCallback: this.clickCallback,
+                zoomCallback: function() {
+                    $('.xline').css({'visibility':'hidden'});
+                },
+                labels: labels,
+            });
+
+            g.ready(this.addEls);
+
         },
         
         close: function() {
-            this.model.set('dataCnt',0);
             $(document).unbind('keydown', this.on_keypress);
             this.stopListening(this.model);
         },
@@ -315,7 +385,7 @@ define(function (require) {
             
             data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
             
-            if(model.get('typePlot') === 'stacked') {
+            if(model.get('typePlot') === 'Stacked') {
                 var addOffset = extendArray.serialIndex(1,hdr.ns);
                 for(var i = 0;i < data.length;i++) {
                     data[i] = extendArray.dotOperation(data[i],addOffset,'add');
@@ -326,56 +396,46 @@ define(function (require) {
                 data[i].unshift(time[i])
             }
             
-            if(model.get('dataCnt') === 1) {
-                
-                if (g) { g.destroy(); }
-                g = new Dygraph($("#dataCont")[0],data,{
-                    xlabel: 'Time (s)',
-                    ylabel: 'Amplitude (' + hdr.units + ')',
-                    displayAnnotations:true,
-                    digitsAfterDecimal : 6,
-                    colors : model.get('colors'),
-                    showLabelsOnHighlight : false,
-                    pointClickCallback: this.pointClickCallback,
-                    clickCallback: this.clickCallback,
-                    zoomCallback: function() {
-                        $('.xline').css({'visibility':'hidden'});
-                    },
-                    labels: labels,
-                });
-                
-                g.ready(this.addEls());
-            }
-            else {
-                g.resetZoom();
-                g.updateOptions({file: data});
+            if(g) {
+                g.updateOptions({file:data});
+            } 
+            else {   
+                if(model.get('typePlot') === 'Stacked') this.plotStacked(data,labels);
+                else this.plotButterfly(data,labels);
             }
             
         },
         
         on_keypress: function(e) {
-            var time = this.model.get('time'),
-                hdr  = this.model.get('hdr');
+            var model = this.model,
+                time  = model.get('time'),
+                hdr   = model.get('hdr');
             
             
             if(e.keyCode === 37) { // Left Button
                 var to   = time[0],
                     from = to - this.model.get('dataLength');
-                this.options.reader.getData(this.model,from,to);
+                this.options.reader.getData(model,from,to);
             }
             
             else if(e.keyCode === 38) { // Up Button
-                g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
+                if(model.get('typePlot') === 'stacked')
+                    model.set('scaling',model.get('scaling')/2);
+                else
+                    g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
             }
             
             else if(e.keyCode === 39) { // Right Button
                 var from = time[time.length-1]+1/hdr.samF,
-                    to   = from + this.model.get('dataLength');
+                    to   = from + model.get('dataLength');
                 this.options.reader.getData(this.model,from,to);
             }
             
             else if(e.keyCode === 40) { // Down Button
-                g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
+                if(model.get('typePlot') === 'stacked')
+                    model.set('scaling',model.get('scaling')*2);
+                else
+                    g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
             }
             
             else if(e.keyCode === 46) { // Delete
