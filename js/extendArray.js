@@ -769,7 +769,6 @@ define(function (require) {
         inverse         : inverse,
         pseudoinverse   : pseudoinverse,
         adjoint         : adjoint,
-        serialize       : serialize,
         reshape         : reshape,
         print           : print
     };
