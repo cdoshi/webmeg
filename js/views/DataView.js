@@ -55,7 +55,10 @@ define(function (require) {
         
         plotType: function(e) {
             var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
-            $(e.target).html(type);
+            
+            if(type === 'Butterfly') $(e.target).html('Stacked');
+            else $(e.target).html('Butterfly');
+            
             this.model.set('typePlot',type);
             g.destroy();
             this.renderData();
@@ -67,8 +70,6 @@ define(function (require) {
                 ticks = [];
             
             for(var i = 0;i < hdr.ns;i++) ticks.push({v:i+1,label:hdr.channels[i]});
-            
-            if(g) g.destroy();
             
             g = new Dygraph($("#dataCont")[0],data,{
                 xlabel: 'Time (s)',
@@ -100,8 +101,6 @@ define(function (require) {
         plotButterfly: function(data,labels) {
             var model = this.model,
                 hdr   = model.get('hdr');
-            
-            if(g) g.destroy();
                 
             g = new Dygraph($("#dataCont")[0],data,{
                 xlabel: 'Time (s)',
@@ -123,6 +122,7 @@ define(function (require) {
         },
         
         close: function() {
+            this.model.set('dataCnt',0);
             $(document).unbind('keydown', this.on_keypress);
             this.stopListening(this.model);
         },
@@ -397,7 +397,12 @@ define(function (require) {
             }
             
             if(g) {
-                g.updateOptions({file:data});
+                if(g.user_attrs_ !== null)
+                    g.updateOptions({file:data});
+                else {
+                    if(model.get('typePlot') === 'Stacked') this.plotStacked(data,labels);
+                    else this.plotButterfly(data,labels);    
+                }
             } 
             else {   
                 if(model.get('typePlot') === 'Stacked') this.plotStacked(data,labels);
@@ -419,7 +424,7 @@ define(function (require) {
             }
             
             else if(e.keyCode === 38) { // Up Button
-                if(model.get('typePlot') === 'stacked')
+                if(model.get('typePlot') === 'Stacked')
                     model.set('scaling',model.get('scaling')/2);
                 else
                     g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
@@ -432,7 +437,7 @@ define(function (require) {
             }
             
             else if(e.keyCode === 40) { // Down Button
-                if(model.get('typePlot') === 'stacked')
+                if(model.get('typePlot') === 'Stacked')
                     model.set('scaling',model.get('scaling')*2);
                 else
                     g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
