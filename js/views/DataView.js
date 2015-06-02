@@ -27,11 +27,15 @@ define(function (require) {
             _.bindAll(this, "addEls");
             _.bindAll(this, "plotStacked");
             _.bindAll(this, "plotButterfly");
+            _.bindAll(this, "scrollRight");
+            _.bindAll(this, "scrollLeft");
             $(document).bind('keydown', this.on_keypress);
             if(g) g.destroy();
             this.render();
             
         },
+        
+       
 
         render: function () {
             this.options.reader.getHeader(this.model);
@@ -39,26 +43,59 @@ define(function (require) {
         },
 
         events: {
-            'click .back-button' : 'close',
-            'click .status'      : 'changeStatus',
-            'click .visible'     : 'changeVisible',
-            'click #allBad'      : 'markAll',
-            'click #someBad'     : 'markSome',
-            'click #allGood'     : 'markAll',
-            'click #someGood'    : 'markSome',
-            'click #hideBad'     : 'hideBad',
-            'click #resetSelect' : 'resetSelection',
-            'click #evType'      : 'crNewEvtType',
-            'click #resetZoom'   : function() { g.resetZoom();},
-            'click #plotType'    : 'plotType'
+            'click .back-button'  : 'close',
+            'click .status'       : 'changeStatus',
+            'click .visible'      : 'changeVisible',
+            'click #allBad'       : 'markAll',
+            'click #someBad'      : 'markSome',
+            'click #allGood'      : 'markAll',
+            'click #someGood'     : 'markSome',
+            'click #hideBad'      : 'hideBad',
+            'click #resetSelect'  : 'resetSelection',
+            'click #evType'       : 'crNewEvtType',
+            'click #resetZoom'    : function() { g.resetZoom();},
+            'change #plotType'    : 'plotType',
+            'change input#chLen'  : 'changeLength',
+            'change input#scPlot' : 'changeScale',
+            'mousewheel #dataCont': 'wheeled'
+        },
+        
+         scrollRight: function() {
+            var time = this.model.get('time'),
+                from = time[time.length-1]+1/this.model.get('hdr').samF,
+                to   = from + this.model.get('dataLength');
+            this.options.reader.getData(this.model,from,to);
+        },
+        
+        scrollLeft: function() {
+             var time = this.model.get('time'), 
+                 to   = time[0],
+                 from = to - this.model.get('dataLength');
+            this.options.reader.getData(this.model,from,to);
+        },
+        
+        wheeled: function(e) {
+            if(e.originalEvent.wheelDelta < 0) this.scrollRight();
+            else this.scrollLeft();
+        },
+        
+        changeScale: function() {
+            this.model.set('scaling',parseFloat($("#scPlot").val()));
+        },
+        
+        changeLength: function() {
+            var time = this.model.get('time'),
+                from = time[0],
+                to;
+            
+            this.model.set('dataLength',parseFloat($("#chLen").val()));
+            
+            to = from + this.model.get('dataLength');
+            this.options.reader.getData(this.model,from,to);
         },
         
         plotType: function(e) {
             var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
-            
-            if(type === 'Butterfly') $(e.target).html('Stacked');
-            else $(e.target).html('Butterfly');
-            
             this.model.set('typePlot',type);
             g.destroy();
             this.renderData();
@@ -168,7 +205,7 @@ define(function (require) {
         },
         
         pointClickCallback: function(e, p) {
-            var value = p.yval * this.model.get('scaling');
+            var value = this.model.get('data')[p.idx][this.model.get('hdr').channels.indexOf(p.name)];
             this.changeColor(p.name,true,'highlight');
             $('.xline').css({'visibility':'visible','left':p.canvasx});
             $('#legend').html('Time:' + p.xval.toFixed(4) + 's;' 
@@ -188,6 +225,7 @@ define(function (require) {
             triggerClick = true;
         },
         
+        // Add vertical line and legend to the graph
         addEls: function() {
             // Create line marker
             var xline  = document.createElement("div"),
@@ -351,7 +389,7 @@ define(function (require) {
                  from  = model.get('startTime'),
                  to    = from + model.get('dataLength');
              
-             // Set the colors, visibility, status (good or bad) and pass to view to render
+             // Set the colors, visibility, status (good or bad) and pass to view for rendering
              model.set('colors',extendArray.initialize([hdr.ns],'custom',model.get('defaultColor')));
              model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
              model.set('good',extendArray.initialize([hdr.ns],'custom',true));
@@ -383,6 +421,8 @@ define(function (require) {
                 model.set('scaling',extendArray.stat(extendArray.serialize(extendArray.stat(data,'absmax')),'absmax')[0]);
             }
             
+            $("#scPlot").val(model.get('scaling'));
+            
             data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
             
             if(model.get('typePlot') === 'Stacked') {
@@ -413,15 +453,11 @@ define(function (require) {
         
         on_keypress: function(e) {
             var model = this.model,
-                time  = model.get('time'),
                 hdr   = model.get('hdr');
             
             
-            if(e.keyCode === 37) { // Left Button
-                var to   = time[0],
-                    from = to - this.model.get('dataLength');
-                this.options.reader.getData(model,from,to);
-            }
+            if(e.keyCode === 37) // Left Button
+               this.scrollLeft();
             
             else if(e.keyCode === 38) { // Up Button
                 if(model.get('typePlot') === 'Stacked')
@@ -430,11 +466,8 @@ define(function (require) {
                     g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
             }
             
-            else if(e.keyCode === 39) { // Right Button
-                var from = time[time.length-1]+1/hdr.samF,
-                    to   = from + model.get('dataLength');
-                this.options.reader.getData(this.model,from,to);
-            }
+            else if(e.keyCode === 39) // Right Button
+                this.scrollRight();
             
             else if(e.keyCode === 40) { // Down Button
                 if(model.get('typePlot') === 'Stacked')

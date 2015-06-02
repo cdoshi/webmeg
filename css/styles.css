@@ -86,3 +86,5 @@ html, body {
     top:0;
     z-index:-1
 }
+
+li { cursor: pointer; cursor: hand; }

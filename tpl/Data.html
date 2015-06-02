@@ -1,4 +1,3 @@
-
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -22,7 +21,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">File
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">                        
-                        <li><a href="#" data-toggle="modal" data-target="#headermodal">File Information</a></li>
+                        
                     </ul>
                 </li>
                 
@@ -30,7 +29,11 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">View
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a id="plotType">Butterfly</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#adjustModal">Adjust</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#chanInfoModal">Channel Information</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#chanSltModal">Channel Selection</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#headerModal">File Information</a></li>
+                        
                         <li><a id="resetZoom">Reset Zoom</a></li>
                     </ul>
                 </li>
@@ -49,17 +52,11 @@
                     </a>
                 </li>
             
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Channels
-                        <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#chaninfo">Channel Information</a>
-                        </li>
-                    </ul>
+                <li>
+                    <a href="#help">
+                        <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
                     </a>
                 </li>
-                <li><a href="#help">Help</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
@@ -67,6 +64,84 @@
 
 <div class="container-fluid" id="dataCont">
 </div>
+
+<!-- Channel Selection Modal -->
+<div class="modal fade" id="chanSltModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Channel Selection</h4>
+            </div>
+            
+            <div class="modal-body row">
+                <div class="col-xs-6">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Selections</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Default</th>
+                                
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-xs-6">
+                </div>
+                
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- Adjust modal -->
+<div class="modal fade" id="adjustModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Adjust View</h4>
+            </div>
+            
+            <div class="modal-body row">
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="chLen">Data Length (s)</label>
+                        <input type="text" class="form-control" id="chLen" value="10" placeholder="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="scPlot">Scaling</label>
+                        <input type="text" class="form-control" id="scPlot" placeholder="1">
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="form-group">
+                        <label for="plotType">Plot Type</label><br>
+                        <input type="checkbox" checked id="plotType"> Plot Stacked
+                    </div>
+                </div>
+                
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <!-- Create Event modal -->
 <div class="modal fade" id="crEvModal">
@@ -91,7 +166,7 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
     
-<div class="modal fade" id="headermodal">
+<div class="modal fade" id="headerModal">
   <div class="modal-dialog">
     <div class="modal-content">
         
@@ -146,7 +221,7 @@
 </div><!-- /.modal -->
 
 
-<div class="modal fade" id="chaninfo">
+<div class="modal fade" id="chanInfoModal">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
         
