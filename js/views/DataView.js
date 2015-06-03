@@ -20,23 +20,27 @@ define(function (require) {
             this.listenTo(this.model, 'change:hdrCnt', this.renderHeader);
             this.listenTo(this.model, 'change:dataCnt',_.throttle(this.renderData, 500,{leading: false}));
             this.listenTo(this.model, 'change:scaling',_.throttle(this.renderData, 500,{leading: false}));
-            _.bindAll(this, "on_keypress");
-            _.bindAll(this, "changeColor");
-            _.bindAll(this, "pointClickCallback");
-            _.bindAll(this, "clickCallback");
-            _.bindAll(this, "addEls");
-            _.bindAll(this, "plotStacked");
-            _.bindAll(this, "plotButterfly");
-            _.bindAll(this, "scrollRight");
-            _.bindAll(this, "scrollLeft");
+            _.bindAll(this, 
+                      "on_keypress",
+                      "changeColor",
+                      "pointClickCallback",
+                      "clickCallback",
+                      "addEls",
+                      "plotStacked",
+                      "plotButterfly",
+                      "scrollRight",
+                      "scrollLeft",
+                      "scaleUp",
+                      "scaleDown"
+                     );
+            
+            
             $(document).bind('keydown', this.on_keypress);
             if(g) g.destroy();
             this.render();
             
         },
         
-       
-
         render: function () {
             this.options.reader.getHeader(this.model);
             return this;
@@ -55,9 +59,14 @@ define(function (require) {
             'click #evType'       : 'crNewEvtType',
             'click #resetZoom'    : function() { g.resetZoom();},
             'change #plotType'    : 'plotType',
-            'change input#chLen'  : 'changeLength',
+            'change input#viewLength'  : 'changeLength',
             'change input#scPlot' : 'changeScale',
-            'mousewheel #dataCont': 'wheeled'
+            'mousewheel #dataCont': 'wheeled',
+            'click #scrollLeft'   : function() { this.scrollLeft();},
+            'click #scrollRight'  : function() { this.scrollRight();},
+            'click #scaleUp'      : function() { this.scaleUp();},
+            'click #scaleDown'    : function() { this.scaleDown();},
+            'click #plotType'     : 'plotType'
         },
         
          scrollRight: function() {
@@ -74,7 +83,27 @@ define(function (require) {
             this.options.reader.getData(this.model,from,to);
         },
         
+        scaleUp: function() {
+            var model = this.model;
+            
+            if(model.get('typePlot') === 'Stacked')
+                model.set('scaling',model.get('scaling')/2);
+            else
+                g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
+            
+        },
+        
+        scaleDown: function() {
+            var model = this.model;
+            
+            if(model.get('typePlot') === 'Stacked')
+                model.set('scaling',model.get('scaling')*2);
+            else
+                g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
+        },
+        
         wheeled: function(e) {
+            e.preventDefault();
             if(e.originalEvent.wheelDelta < 0) this.scrollRight();
             else this.scrollLeft();
         },
@@ -88,7 +117,7 @@ define(function (require) {
                 from = time[0],
                 to;
             
-            this.model.set('dataLength',parseFloat($("#chLen").val()));
+            this.model.set('dataLength',parseFloat($("#viewLength").val()));
             
             to = from + this.model.get('dataLength');
             this.options.reader.getData(this.model,from,to);
@@ -96,6 +125,11 @@ define(function (require) {
         
         plotType: function(e) {
             var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
+            if($(e.target).hasClass('glyphicon-option-horizontal')) {
+                $(e.target).removeClass().addClass('glyphicon glyphicon-option-vertical');
+            } else {
+                $(e.target).removeClass().addClass('glyphicon glyphicon-option-horizontal');
+            }
             this.model.set('typePlot',type);
             g.destroy();
             this.renderData();
@@ -401,7 +435,7 @@ define(function (require) {
                                      good:model.get('good')
                                     }) + alertTemplate());
              
-             
+             $('[data-toggle="tooltip"]').tooltip();
              this.options.reader.getData(model,from,to);
             
         },
@@ -459,23 +493,12 @@ define(function (require) {
             if(e.keyCode === 37) // Left Button
                this.scrollLeft();
             
-            else if(e.keyCode === 38) { // Up Button
-                if(model.get('typePlot') === 'Stacked')
-                    model.set('scaling',model.get('scaling')/2);
-                else
-                    g.updateOptions({valueRange:[g.axes_[0].minyval/2,g.axes_[0].maxyval/2]});
-            }
-            
+            else if(e.keyCode === 38) // Up Button
+                this.scaleUp();
             else if(e.keyCode === 39) // Right Button
                 this.scrollRight();
-            
-            else if(e.keyCode === 40) { // Down Button
-                if(model.get('typePlot') === 'Stacked')
-                    model.set('scaling',model.get('scaling')*2);
-                else
-                    g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
-            }
-            
+            else if(e.keyCode === 40) // Down Button    
+                this.scaleDown();
             else if(e.keyCode === 46) { // Delete
                 this.markSome();
                 this.hideBad();

@@ -65,6 +65,39 @@
 <div class="container-fluid" id="dataCont">
 </div>
 
+<footer class="footer">
+    <div class="container form-inline">
+        <div class="form-group">
+            <button class="form-control btn btn-info" id="scrollLeft" data-toggle="tooltip" data-placement="top" title="Scroll Left">
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            </button>
+        </div>
+        <div class="form-group">
+            <button class="form-control btn btn-info" id="scrollRight" data-toggle="tooltip" data-placement="top" title="Scroll Right">
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            </button>
+        </div>
+        <div class="form-group">
+            <button class="form-control btn btn-info" id="scaleUp" data-toggle="tooltip" data-placement="top" title="Increase amplitude">
+                <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+            </button>
+        </div>
+        <div class="form-group">
+            <button class="form-control btn btn-info" id="scaleDown" data-toggle="tooltip" data-placement="top" title="Decrease amplitude">
+                <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+            </button>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="viewLength" placeholder="10" data-toggle="tooltip" data-placement="top" title="Change display duration">
+        </div>
+        <div class="form-group">
+            <button class="form-control btn btn-info" id="plotType" data-toggle="tooltip" data-placement="top" title="Change Plot Type" active>
+                <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+</footer>
+
 <!-- Channel Selection Modal -->
 <div class="modal fade" id="chanSltModal">
     <div class="modal-dialog">
@@ -130,7 +163,7 @@
                 <div class="col-xs-6">
                     <div class="form-group">
                         <label for="plotType">Plot Type</label><br>
-                        <input type="checkbox" checked id="plotType"> Plot Stacked
+                        <input type="checkbox" checked id="plotType1"> Plot Stacked
                     </div>
                 </div>
                 
