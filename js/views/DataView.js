@@ -59,17 +59,31 @@ define(function (require) {
             'click #evType'       : 'crNewEvtType',
             'click #resetZoom'    : function() { g.resetZoom();},
             'change #plotType'    : 'plotType',
-            'change input#viewLength'  : 'changeLength',
+            'change input#dataLength'  : 'changeLength',
             'change input#scPlot' : 'changeScale',
             'mousewheel #dataCont': 'wheeled',
             'click #scrollLeft'   : function() { this.scrollLeft();},
             'click #scrollRight'  : function() { this.scrollRight();},
             'click #scaleUp'      : function() { this.scaleUp();},
             'click #scaleDown'    : function() { this.scaleDown();},
-            'click #plotType'     : 'plotType'
+            'click #plotType'     : 'plotType',
+            'click #mrkEv'        : 'markEvent',
+            
         },
         
-         scrollRight: function() {
+        markEvent: function() {
+            g.setAnnotations([
+                {
+                    series: this.model.get('hdr').channels[0],
+                    x:$("#legend").attr('data-timeval') ,
+                    shortText: "Event1",
+                    text: "",
+                    attachAtBottom:true
+                }
+            ]);
+        },
+        
+        scrollRight: function() {
             var time = this.model.get('time'),
                 from = time[time.length-1]+1/this.model.get('hdr').samF,
                 to   = from + this.model.get('dataLength');
@@ -109,26 +123,41 @@ define(function (require) {
         },
         
         changeScale: function() {
+            var val = parseFloat($("#scPlot").val());
+            if(isNaN(val)) {
+                $("#scPlot").val(this.model.get('scaling'));
+                return;
+            }
             this.model.set('scaling',parseFloat($("#scPlot").val()));
         },
         
         changeLength: function() {
             var time = this.model.get('time'),
                 from = time[0],
+                val  = parseFloat($("#dataLength").val()),
                 to;
             
-            this.model.set('dataLength',parseFloat($("#viewLength").val()));
+            if(isNaN(val)) {
+                $("#dataLength").val(this.model.get('dataLength'));
+                return;
+            }
+            else if(val < 0 || val > this.model.get('hdr').records) {
+                $("#dataLength").val(this.model.get('dataLength'));
+                return;
+            }
             
-            to = from + this.model.get('dataLength');
+            this.model.set('dataLength',val);
+            
+            to = from + val;
             this.options.reader.getData(this.model,from,to);
         },
         
         plotType: function(e) {
             var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
-            if($(e.target).hasClass('glyphicon-option-horizontal')) {
-                $(e.target).removeClass().addClass('glyphicon glyphicon-option-vertical');
+            if($('#plotType span').hasClass('glyphicon-option-horizontal')) {
+                $('#plotType span').removeClass().addClass('glyphicon glyphicon-option-vertical');
             } else {
-                $(e.target).removeClass().addClass('glyphicon glyphicon-option-horizontal');
+                $('#plotType span').removeClass().addClass('glyphicon glyphicon-option-horizontal');
             }
             this.model.set('typePlot',type);
             g.destroy();
@@ -245,6 +274,7 @@ define(function (require) {
             $('#legend').html('Time:' + p.xval.toFixed(4) + 's;' 
                               + p.name + ':' + value.toFixed(2) + this.model.get('hdr').units);
             $('#legend').css({'visibility':'visible'});
+            $('#legend').attr('data-timeval',p.xval);
             triggerClick = false;
         },
         
@@ -254,6 +284,7 @@ define(function (require) {
                     $('.xline').css({'visibility':'visible','left':pts[0].canvasx});
                     $('#legend').html('Time:' + pts[0].xval.toFixed(4) + 's');
                     $('#legend').css({'visibility':'visible'});
+                    $('#legend').attr('data-timeval',pts[0].xval);
                 }
             }
             triggerClick = true;
@@ -471,14 +502,16 @@ define(function (require) {
             }
             
             if(g) {
-                if(g.user_attrs_ !== null)
+                if(g.user_attrs_ !== null) {
+                    if(g.isZoomed()) g.resetZoom();
                     g.updateOptions({file:data});
+                }
                 else {
                     if(model.get('typePlot') === 'Stacked') this.plotStacked(data,labels);
                     else this.plotButterfly(data,labels);    
                 }
             } 
-            else {   
+            else {
                 if(model.get('typePlot') === 'Stacked') this.plotStacked(data,labels);
                 else this.plotButterfly(data,labels);
             }

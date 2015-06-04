@@ -100,6 +100,11 @@ li { cursor: pointer; cursor: hand; }
 .footer > .form-inline > .form-group {
     display: inline-block
 }
-#viewLength {
+
+#dataLength {
     width:50px
+}
+
+#scPlot {
+    width:100px
 }
