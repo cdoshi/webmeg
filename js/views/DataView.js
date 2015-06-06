@@ -69,20 +69,51 @@ define(function (require) {
             'click #plotType'     : 'plotType',
             'click #mrkEv'        : 'markEvent',
             'click #sltTable td'  : 'chSlt',
+            'click #applySlt'     : 'applySlt',
             'change #plotType'    : 'plotType',
-            'change input#dataLength'  : 'changeLength',
-            'change input#scPlot' : 'changeScale'
+            'change input#scPlot' : 'changeScale',
+            'change input#dataLength'  : 'changeLength'
+        },
+        
+        applySlt: function() {
+            var options = $("#chList").find('option:selected'),
+                model   = this.model,
+                hdr     = model.get('hdr'),
+                currSlt = model.get('currentSlt'),
+                slts    = model.get('selection'),
+                index   = slts.names.indexOf(currSlt),
+                indices=[];
+            
+            if(options.length === 0) {
+                $("#alertDiv").find('.modal-title').text('Select atleast one channel')
+                $("#alertDiv").modal('show');
+                return;
+            }
+            
+            for(var i = 0;i < options.length;i++) {
+                indices[i] = hdr.channels.indexOf(options[i].text);
+            }
+            
+            slts.indices[index] = indices;
+            g.destroy();
+            this.renderData();
         },
         
         chSlt: function(e) {
             var val = $(e.target).html().trim();
             
             if(val !== this.model.get('currentSlt')) {
-                var slts = this.model.get('selection'),
-                    index = slts.names.indexOf(val);
-                $("#chList").find('option:selected').removeAttr("selected");
+                var slts    = this.model.get('selection'),
+                    index   = slts.names.indexOf(val),
+                    indices = slts.indices[index],
+                    options = $("#chList").find('option');
                 
+                
+                $("#chList").find('option:selected').removeAttr('selected');
                 $("#sltTable td").removeClass('active');
+                for(var i = 0;i < indices.length;i++)
+                    $($("#chList").find('option')[indices[i]]).attr('selected','selected');
+                
                 $(e.target).addClass('active');
                 g.destroy();
                 this.model.set('currentSlt',val);
