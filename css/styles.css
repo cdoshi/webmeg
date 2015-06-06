@@ -108,3 +108,11 @@ li { cursor: pointer; cursor: hand; }
 #scPlot {
     width:100px
 }
+
+.navbar-default {
+    z-index:11
+}
+
+#chList {
+    height:300px
+}

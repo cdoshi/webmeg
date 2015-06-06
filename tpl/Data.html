@@ -90,7 +90,7 @@
             <input type="text" class="form-control" id="dataLength" value="10" placeholder="10" data-toggle="tooltip" data-placement="top" title="Change display duration (s)">
         </div>
         <div class="form-group">
-            <button class="form-control btn btn-info" id="plotType" data-toggle="tooltip" data-placement="top" title="Change Plot Type" active>
+            <button class="form-control btn btn-info" id="plotType" data-toggle="tooltip" data-placement="top" title="Change Plot Type">
                 <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
             </button>
         </div>
@@ -102,7 +102,7 @@
 
 <!-- Channel Selection Modal -->
 <div class="modal fade" id="chanSltModal">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -113,26 +113,53 @@
             
             <div class="modal-body row">
                 <div class="col-xs-6">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="sltTable">
                         <thead>
                             <tr>
                                 <th>Selections</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <th scope="row">Default</th>
-                                
-                            </tr>
+                            <% for(var i = 0;i < selection.names.length;i++)  { %>
+                                <tr>
+                                    <% if(i === 0) { %>
+                                        <td class="active">
+                                    <% } else { %>
+                                        <td>
+                                    <% } %>
+                                        <%= selection.names[i] %>
+                                    </td>
+                                </tr>
+                            <% } %>
+                            
                         </tbody>
                     </table>
+                    <button class="btn btn-success">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add
+                    </button>
+                    <button class="btn btn-info">
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> Edit
+                    </button>
+                    <button class="btn btn-danger">
+                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                    </button>
                 </div>
                 <div class="col-xs-6">
+                    <select multiple class="form-control" id="chList">
+                        <% for(var i = 0;i < hdr.channels.length;i++) { %>
+                            <% if(selection.indices[0].indexOf(i) >= 0) { %>
+                                <option selected><%= hdr.channels[i] %></option>
+                            <% } else { %>
+                            <option><%= hdr.channels[i] %></option>
+                            <% } %>
+                        <% } %>
+                    </select>
                 </div>
                 
             </div>
             
             <div class="modal-footer">
+                <button type="button" class="btn btn-info">Apply Selection</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div><!-- /.modal-content -->

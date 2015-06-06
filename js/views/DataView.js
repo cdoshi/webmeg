@@ -20,6 +20,7 @@ define(function (require) {
             this.listenTo(this.model, 'change:hdrCnt', this.renderHeader);
             this.listenTo(this.model, 'change:dataCnt',_.throttle(this.renderData, 500,{leading: false}));
             this.listenTo(this.model, 'change:scaling',_.throttle(this.renderData, 500,{leading: false}));
+            this.listenTo(this.model, 'change:currentSlt',this.renderData);
             _.bindAll(this, 
                       "on_keypress",
                       "changeColor",
@@ -31,7 +32,9 @@ define(function (require) {
                       "scrollRight",
                       "scrollLeft",
                       "scaleUp",
-                      "scaleDown"
+                      "scaleDown",
+                      "getColors",
+                      "getVisible"
                      );
             
             
@@ -58,9 +61,6 @@ define(function (require) {
             'click #resetSelect'  : 'resetSelection',
             'click #evType'       : 'crNewEvtType',
             'click #resetZoom'    : function() { g.resetZoom();},
-            'change #plotType'    : 'plotType',
-            'change input#dataLength'  : 'changeLength',
-            'change input#scPlot' : 'changeScale',
             'mousewheel #dataCont': 'wheeled',
             'click #scrollLeft'   : function() { this.scrollLeft();},
             'click #scrollRight'  : function() { this.scrollRight();},
@@ -68,7 +68,25 @@ define(function (require) {
             'click #scaleDown'    : function() { this.scaleDown();},
             'click #plotType'     : 'plotType',
             'click #mrkEv'        : 'markEvent',
+            'click #sltTable td'  : 'chSlt',
+            'change #plotType'    : 'plotType',
+            'change input#dataLength'  : 'changeLength',
+            'change input#scPlot' : 'changeScale'
+        },
+        
+        chSlt: function(e) {
+            var val = $(e.target).html().trim();
             
+            if(val !== this.model.get('currentSlt')) {
+                var slts = this.model.get('selection'),
+                    index = slts.names.indexOf(val);
+                $("#chList").find('option:selected').removeAttr("selected");
+                
+                $("#sltTable td").removeClass('active');
+                $(e.target).addClass('active');
+                g.destroy();
+                this.model.set('currentSlt',val);
+            }  
         },
         
         markEvent: function() {
@@ -152,6 +170,33 @@ define(function (require) {
             this.options.reader.getData(this.model,from,to);
         },
         
+        getColors: function() {
+            var model = this.model,
+                colors = model.get('colors'),
+                slts  = model.get('selection'),
+                currSlt = model.get('currentSlt'),
+                index = slts.names.indexOf(currSlt),
+                indices = slts.indices[index],
+                currColor=[];
+            
+            for(var i = 0;i < indices.length;i++) currColor[i] = colors[indices[i]];
+            return currColor;
+            
+        },
+        
+        getVisible: function() {
+            var model       = this.model,
+                visible     = model.get('visible'),
+                slts        = model.get('selection'),
+                currSlt     = model.get('currentSlt'),
+                index       = slts.names.indexOf(currSlt),
+                indices     = slts.indices[index],
+                currVisible = [];
+            
+            for(var i = 0;i < indices.length;i++) currVisible[i] = visible[indices[i]];
+            return currVisible;
+        },
+        
         plotType: function(e) {
             var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
             if($('#plotType span').hasClass('glyphicon-option-horizontal')) {
@@ -169,14 +214,15 @@ define(function (require) {
                 hdr   = model.get('hdr'),
                 ticks = [];
             
-            for(var i = 0;i < hdr.ns;i++) ticks.push({v:i+1,label:hdr.channels[i]});
+            for(var i = 1;i < labels.length;i++) ticks.push({v:i,label:labels[i]});
             
             g = new Dygraph($("#dataCont")[0],data,{
                 xlabel: 'Time (s)',
                 displayAnnotations: true,
                 digitsAfterDecimal : 6,
-                colors: model.get('colors'),
-                valueRange: [0,hdr.ns+1],
+                colors: this.getColors(),
+                visibility: this.getVisible(),
+                valueRange: [0,labels.length],
                 showLabelsOnHighlight : false,
                 pointClickCallback: this.pointClickCallback,
                 clickCallback: this.clickCallback,
@@ -194,8 +240,6 @@ define(function (require) {
             });
 
             g.ready(this.addEls);
-            
-            
         },
         
         plotButterfly: function(data,labels) {
@@ -207,7 +251,8 @@ define(function (require) {
                 ylabel: 'Amplitude (' + hdr.units + ')',
                 displayAnnotations:true,
                 digitsAfterDecimal : 6,
-                colors : model.get('colors'),
+                colors : this.getColors(),
+                visibility: this.getVisible(),
                 showLabelsOnHighlight : false,
                 pointClickCallback: this.pointClickCallback,
                 clickCallback: this.clickCallback,
@@ -327,7 +372,7 @@ define(function (require) {
                 chan    = $(row.find('.channel')).html(),
                 hdr     = this.model.get('hdr'),
                 index   = hdr.channels.indexOf(chan),
-                visible = this.model.get('good'),
+                visible = this.model.get('visible'),
                 index1  = g.user_attrs_.labels.indexOf(chan) - 1;
             
             if($(e.target).is(':checked'))
@@ -336,7 +381,7 @@ define(function (require) {
                 visible[index] = false;
             
             if(index1 >= 0)
-                g.setVisibility(index,visible[index]);
+                g.setVisibility(index1,visible[index]);
             
         },
         
@@ -431,7 +476,7 @@ define(function (require) {
                     $(value).find('.visible').removeAttr('checked');
                     chanIndex = labels.indexOf(chan) - 1;
                     if(chanIndex >=0)
-                        g.setVisibility(index,visible[index]);
+                        g.setVisibility(chanIndex,visible[index]);
                 }
             });
                 
@@ -452,18 +497,26 @@ define(function (require) {
                  file  = model.get('file')[0],
                  hdr   = model.get('hdr'),
                  from  = model.get('startTime'),
-                 to    = from + model.get('dataLength');
+                 to    = from + model.get('dataLength'),
+                 slts  = model.get('selection');
              
-             // Set the colors, visibility, status (good or bad) and pass to view for rendering
-             model.set('colors',extendArray.initialize([hdr.ns],'custom',model.get('defaultColor')));
-             model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
-             model.set('good',extendArray.initialize([hdr.ns],'custom',true));
+             if(model.get('colors').length === 0) {
+                 // Set the colors, visibility, status (good or bad) and pass to view for rendering
+                 model.set('colors',extendArray.initialize([hdr.ns],'custom',model.get('defaultColor')));
+                 model.set('good',extendArray.initialize([hdr.ns],'custom',true));
+                 model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
+                 slts.names[0] = 'Default';
+                 slts.indices[0] = extendArray.serialIndex(0,19);
+                 
+                 model.set('currentSlt','Default');
+             }
              
              this.$el.html(template({fileName: file.name,
                                      hdr: hdr,
                                      colors: model.get('colors'),
                                      visible: model.get('visible'),
-                                     good:model.get('good')
+                                     good:model.get('good'),
+                                     selection:model.get('selection')
                                     }) + alertTemplate());
              
              $('[data-toggle="tooltip"]').tooltip();
@@ -471,16 +524,21 @@ define(function (require) {
             
         },
         
-        
         renderData: function() {
             if(this.model.get('dataCnt') === 0) return;
-            var model  = this.model,
-                hdr    = this.model.get('hdr'),
-                data   = extendArray.scalarOperation(this.model.get('data'),'copy'),
-                time   = this.model.get('time'),
-                labels = hdr.channels.slice();
+            var model   = this.model,
+                hdr     = model.get('hdr'),
+                slts    = model.get('selection'),
+                curSlt  = model.get('currentSlt'),
+                data    = extendArray.scalarOperation(this.model.get('data'),'copy'),
+                time    = this.model.get('time'),
+                index   = slts.names.indexOf(curSlt),
+                indices = slts.indices[index],
+                labels  = ['Time'];
             
-           labels.unshift("Time");
+            for(var i = 0;i < indices.length;i++) labels[i+1] = hdr.channels[indices[i]];
+            
+            data = extendArray.subset(data,[':',indices]);
             
             if(model.get('scaling') === 0) {
                 model.set('scaling',extendArray.stat(extendArray.serialize(extendArray.stat(data,'absmax')),'absmax')[0]);
@@ -491,7 +549,7 @@ define(function (require) {
             data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
             
             if(model.get('typePlot') === 'Stacked') {
-                var addOffset = extendArray.serialIndex(1,hdr.ns);
+                var addOffset = extendArray.serialIndex(1,indices.length);
                 for(var i = 0;i < data.length;i++) {
                     data[i] = extendArray.dotOperation(data[i],addOffset,'add');
                 }
@@ -515,17 +573,11 @@ define(function (require) {
                 if(model.get('typePlot') === 'Stacked') this.plotStacked(data,labels);
                 else this.plotButterfly(data,labels);
             }
-            
         },
         
         on_keypress: function(e) {
-            var model = this.model,
-                hdr   = model.get('hdr');
-            
-            
             if(e.keyCode === 37) // Left Button
                this.scrollLeft();
-            
             else if(e.keyCode === 38) // Up Button
                 this.scaleUp();
             else if(e.keyCode === 39) // Right Button

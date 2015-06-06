@@ -96,7 +96,8 @@ define(function (require) {
         
         // Get dimensions of array
         dimensions = function (arr,check) {
-            if(check === undefined) {
+            if(check === undefined) check = true;
+            if(check) {
                 if(arr === undefined) return [];
                 if(arr.length === 0) return 0;
                 if(!this.checkArray(arr)) return false;
@@ -254,7 +255,7 @@ define(function (require) {
                type !== 'divide') 
                 return false;
             
-           var size = this.dimensions(arr),
+           var size = this.dimensions(arr,false),
                 dim,
                 newarr=[];
             

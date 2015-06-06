@@ -26,7 +26,9 @@ define(function (require) {
                 highlightColor:'#00FF00',
                 annotation:[],
                 evType:[],
-                typePlot:'Stacked'
+                typePlot:'Stacked',
+                selection:{names:['Default','One'],indices:[[1,2,3,4,5],[1,2,3,4,5]]},
+                currentSlt:''
             },
             initialize: function() {
             }
