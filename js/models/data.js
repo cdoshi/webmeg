@@ -27,7 +27,7 @@ define(function (require) {
                 annotation:[],
                 evType:[],
                 typePlot:'Stacked',
-                selection:{names:['Default','One'],indices:[[1,2,3,4,5],[1,2,3,4,5]]},
+                selection:{names:[],indices:[]},
                 currentSlt:''
             },
             initialize: function() {

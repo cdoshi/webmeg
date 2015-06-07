@@ -25,9 +25,7 @@ require.config({
         }, 
         'dygraphs': {
             exports: 'Dygraph,DygraphCanvasRenderer,DygraphLayout,DygraphOptions'
-        },
-        
-		
+        },	
     }
 
 });

@@ -11,6 +11,137 @@
     </div><!-- /.container-fluid -->
 </nav>
 
+<div class="container-fluid">
+    <h2>WebMEG: Browsing time series data using JavaScript</h2>
+    
+    <div class="panel-group" id="accordion">
+        
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#what">What is WebMEG?</a>
+                </h4>
+            </div>
+            <div id="what" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    WebMEG is a dynamic client side application developed primarily in JavaScript 
+                    for viewing and analyzing time series data. Users can not only view but also
+                    interact with data on a web browser like never before. It does not need any outgoing 
+                    data transfer over the network thus protecting data privacy.
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#started">How do I get started?</a>
+                </h4>
+            </div>
+            <div id="started" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <a href="https://www.dropbox.com/sh/d5sr68bsedgvtwi/z2g1JIh1Y8" target="_blank">Download</a> sample file and see WebMEG in action. Refer <a href="#interact" data-toggle="collapse" data-parent="#accordion"> FAQ </a> below for learning how to interact with the data
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#structure">
+                        On what technologies is WebMEG built on?
+                    </a>
+                </h4>
+            </div>
+            <div id="structure" class="panel-collapse collapse">
+                <div class="panel-body">
+                    WebMEG is developed mainly in JavaScript, some HTML and CSS. 
+                    WebMEG uses Backbone for providing a solid model-view structure.
+                    As more data formats are added, the application as it grows can become big
+                    and therefore RequireJS is used for managing dependencies. It uses JQuery for DOM
+                    manipulation and Bootstrap for UI design. Since the amount of data to be
+                    visualized can be huge, WebMEG uses Dygraphs for plotting purposes. Dygraph
+                    is capable of handling millions of data points without getting bogged down and
+                    also provides flexibility in developing such a novel application.
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#interact">
+                        How do I interact with the data?
+                    </a>
+                </h4>
+            </div>
+            <div id="interact" class="panel-collapse collapse">
+                <div class="panel-body">
+                    Users can interact with their data in multiple ways.
+                    Either using buttons provided at the footer or using keyboard shortcuts
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Key/Button</th>
+                                <th>Function</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Up/Down Key</td>
+                                <td>Increase/Decrease amplitude of your data</td>
+                            </tr>
+                            <tr>
+                                <td>Left/Right Key</td>
+                                <td>Scroll left/right of your data</td>
+                            </tr>
+                            <tr>
+                                <td>Mouse click on series</td>
+                                <td>Highlight the series</td>
+                            </tr>
+                            <tr>
+                                <td>Delete</td>
+                                <td>Mark highlighted series as bad and remove them from display</td>
+                            </tr>
+                            <tr>
+                                <td>Left mouse click and drag</td>
+                                <td>Zoom into your data</td>
+                            </tr>
+                            <tr>
+                                <td>Shift Key + drag </td>
+                                <td>Pan your data</td>
+                            </tr>
+                            <tr>
+                                <td>Double mouse click</td>
+                                <td>Reset Zoom</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    Also user can use the menu bar to change the visibility of channels, mark channels as good or bad,
+                    create a selection to view only those channels of interest, edit selection and delete selection.
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#support">
+                        On what devices is it supported?
+                    </a>
+                </h4>
+            </div>
+            <div id="support" class="panel-collapse collapse">
+                <div class="panel-body">
+                    Currently, WebMEG is supported on all major browsers. Work is in progress to enable
+                    it across multiple devices like tablets, phones etc
+                </div>
+            </div>
+        </div>
+        
+    </div> 
+</div>
+
 
 
 

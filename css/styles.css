@@ -7,7 +7,7 @@ html, body {
 }
 
 #dropCont {
-    background-color: olive;
+    background-color: white;
     text-align: center;
     border-style: dashed;
     height: calc(100% - 52px);

@@ -35,8 +35,7 @@ define(function (require) {
                       "scaleDown",
                       "getColors",
                       "getVisible"
-                     );
-            
+                     );        
             
             $(document).bind('keydown', this.on_keypress);
             if(g) g.destroy();
@@ -69,12 +68,72 @@ define(function (require) {
             'click #plotType'     : 'plotType',
             'click #mrkEv'        : 'markEvent',
             'click #sltTable td'  : 'chSlt',
+            'click #delSlt'       : 'deleteSlt',
+            'click #addSlt'       : 'addSlt',
+            'click #editSlt'      : 'editSlt',
             'click #applySlt'     : 'applySlt',
             'change #plotType'    : 'plotType',
             'change input#scPlot' : 'changeScale',
-            'change input#dataLength'  : 'changeLength'
+            'change input#dataLength'  : 'changeLength',
+            'change input#editSlnName' : 'editSlnName'
         },
         
+        // Add a user channel selection
+        addSlt: function() {        
+            var slts = this.model.get('selection'),
+                num  = slts.names.length;
+            slts.names[num] = 'Default_' + num;
+            slts.indices[num] = [0];
+            $('#sltTable tr:last').after('<tr><td>' + slts.names[num] + '</td></tr>');
+            $('#sltTable td').eq(num).trigger('click');
+        },
+        
+        // Edit user selection
+        editSlt: function(e) {
+            var row  = $('#sltTable').find('.active'),
+                name = row.html().trim();
+            
+            console.log($(e.target));
+            row.parent().html('<input id="editSlnName" type="text" class="form-control active" value="' + name +'">');
+        },
+        
+        // Trigger only if user changes the name of channel selection
+        editSlnName: function(e) {
+            var slts  = this.model.get('selection'),
+                name  = $('#editSlnName').val().trim(),
+                row   = $('#sltTable').find('.active'),
+                index = $("#sltTable tbody tr").index(row.parent());
+            
+            if(slts.names.indexOf(name) >= 0) {
+                $("#alertDiv").find('.modal-title').text('Cannot have the same name')
+                $("#alertDiv").modal('show');
+                return;
+            } else {
+                row.parent().html('<td class="active">' + name +'</td>');
+                slts.names[index] = name;
+            }
+            
+        },
+        
+        // Delete channel selection
+        deleteSlt: function() {
+            if($('#sltTable td').length === 1) {
+                $("#alertDiv").find('.modal-title').text('Need to have at least one selection');
+                $("#alertDiv").modal('show');
+                return;
+            }
+            var slt   = $("#sltTable").find('.active').html().trim(),
+                slts  = this.model.get('selection'),
+                index = slts.names.indexOf(slt);
+            
+                slts.names.splice(index,1);
+                slts.indices.splice(index,1);
+                $("#sltTable td").eq(index).remove();
+                $("#sltTable td").eq(0).trigger('click');
+            
+        },
+        
+        // Apply channels selected by user to the display
         applySlt: function() {
             var options = $("#chList").find('option:selected'),
                 model   = this.model,
@@ -99,6 +158,7 @@ define(function (require) {
             this.renderData();
         },
         
+        // Change channels selected if user clicks on a selection table
         chSlt: function(e) {
             var val = $(e.target).html().trim();
             
@@ -112,7 +172,7 @@ define(function (require) {
                 $("#chList").find('option:selected').removeAttr('selected');
                 $("#sltTable td").removeClass('active');
                 for(var i = 0;i < indices.length;i++)
-                    $($("#chList").find('option')[indices[i]]).attr('selected','selected');
+                    $("#chList").find('option').eq(indices[i]).attr('selected','selected');
                 
                 $(e.target).addClass('active');
                 g.destroy();
@@ -120,6 +180,7 @@ define(function (require) {
             }  
         },
         
+        // In progress
         markEvent: function() {
             g.setAnnotations([
                 {
@@ -132,6 +193,7 @@ define(function (require) {
             ]);
         },
         
+        // Scroll to the right of data
         scrollRight: function() {
             var time = this.model.get('time'),
                 from = time[time.length-1]+1/this.model.get('hdr').samF,
@@ -139,6 +201,7 @@ define(function (require) {
             this.options.reader.getData(this.model,from,to);
         },
         
+        // Scroll to the left of data
         scrollLeft: function() {
              var time = this.model.get('time'), 
                  to   = time[0],
@@ -146,6 +209,7 @@ define(function (require) {
             this.options.reader.getData(this.model,from,to);
         },
         
+        // Increase the scale of the data
         scaleUp: function() {
             var model = this.model;
             
@@ -156,6 +220,7 @@ define(function (require) {
             
         },
         
+        // Decrease the scale of data
         scaleDown: function() {
             var model = this.model;
             
@@ -165,12 +230,14 @@ define(function (require) {
                 g.updateOptions({valueRange:[g.axes_[0].minyval*2,g.axes_[0].maxyval*2]});
         },
         
+        // Scroll through the data is user uses mouse wheel
         wheeled: function(e) {
             e.preventDefault();
             if(e.originalEvent.wheelDelta < 0) this.scrollRight();
             else this.scrollLeft();
         },
         
+        // Change scale is user manually enters a number
         changeScale: function() {
             var val = parseFloat($("#scPlot").val());
             if(isNaN(val)) {
@@ -180,6 +247,7 @@ define(function (require) {
             this.model.set('scaling',parseFloat($("#scPlot").val()));
         },
         
+        // Change length of data on display
         changeLength: function() {
             var time = this.model.get('time'),
                 from = time[0],
@@ -201,6 +269,7 @@ define(function (require) {
             this.options.reader.getData(this.model,from,to);
         },
         
+        // Get colors of all channels selected in the selection window
         getColors: function() {
             var model = this.model,
                 colors = model.get('colors'),
@@ -215,6 +284,7 @@ define(function (require) {
             
         },
         
+        // Get visibility of all channels selected in the selection window
         getVisible: function() {
             var model       = this.model,
                 visible     = model.get('visible'),
@@ -228,6 +298,7 @@ define(function (require) {
             return currVisible;
         },
         
+        // Change plot type to stacked or butterfly when user clicks button on the footer
         plotType: function(e) {
             var type = (this.model.get('typePlot') === 'Stacked') ? 'Butterfly' : 'Stacked';
             if($('#plotType span').hasClass('glyphicon-option-horizontal')) {
@@ -240,6 +311,7 @@ define(function (require) {
             this.renderData();
         },
         
+        // Plot series in stacked mode
         plotStacked: function(data,labels) {
             var model = this.model,
                 hdr   = model.get('hdr'),
@@ -273,6 +345,7 @@ define(function (require) {
             g.ready(this.addEls);
         },
         
+        // Plot series in butterfly mode
         plotButterfly: function(data,labels) {
             var model = this.model,
                 hdr   = model.get('hdr');
@@ -297,12 +370,15 @@ define(function (require) {
 
         },
         
+        // When user clicks back-button unbind all events and stop listening to key down events
         close: function() {
             this.model.set('dataCnt',0);
+            this.unbind();
             $(document).unbind('keydown', this.on_keypress);
             this.stopListening(this.model);
         },
         
+        // Change color if user clicks on series or marks as bad channel and vice-versa
         changeColor: function(chan,update,type,color) {
             var model     = this.model,
                 hdr       = model.get('hdr'),
@@ -343,6 +419,7 @@ define(function (require) {
             
         },
         
+        // Trigger this callback when user clicks on a time series
         pointClickCallback: function(e, p) {
             var value = this.model.get('data')[p.idx][this.model.get('hdr').channels.indexOf(p.name)];
             this.changeColor(p.name,true,'highlight');
@@ -354,6 +431,7 @@ define(function (require) {
             triggerClick = false;
         },
         
+        // Trigger this callback when user clicks on chart area
         clickCallback: function(e,x,pts) {
             if(triggerClick) {
                 if(pts.length > 0) {
@@ -379,6 +457,7 @@ define(function (require) {
             $("#dataCont")[0].appendChild(legend);
         },
         
+        // Change status of channel to good or bad
         changeStatus: function(e) {
             var row   = $(e.target).parent().parent(),
                 chan  = $(row.find('.channel')).html(),
@@ -398,6 +477,7 @@ define(function (require) {
             this.changeColor(chan,true,'bad');
         },
         
+        // Change visibility of the channel
         changeVisible: function(e) {
             var row     = $(e.target).parent().parent(),
                 chan    = $(row.find('.channel')).html(),
@@ -449,6 +529,7 @@ define(function (require) {
             g.updateOptions({});
         },
         
+        // Remove the highlight from all series
         resetSelection: function(e) {
             var that  = this,
                 model = this.model,
@@ -492,6 +573,7 @@ define(function (require) {
             g.updateOptions({});
         },
         
+        // Do not display bad channels
         hideBad: function(e) {
             var labels  = g.user_attrs_.labels,
                 visible = this.model.get('visible'),
@@ -523,23 +605,23 @@ define(function (require) {
             }
         },
         
-         renderHeader: function() {
-             var model =  this.model,
-                 file  = model.get('file')[0],
-                 hdr   = model.get('hdr'),
-                 from  = model.get('startTime'),
-                 to    = from + model.get('dataLength'),
-                 slts  = model.get('selection');
-             
-             if(model.get('colors').length === 0) {
-                 // Set the colors, visibility, status (good or bad) and pass to view for rendering
-                 model.set('colors',extendArray.initialize([hdr.ns],'custom',model.get('defaultColor')));
-                 model.set('good',extendArray.initialize([hdr.ns],'custom',true));
-                 model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
-                 slts.names[0] = 'Default';
-                 slts.indices[0] = extendArray.serialIndex(0,19);
-                 
-                 model.set('currentSlt','Default');
+        // Render the first glimpse of the data and set view to file parameters
+        renderHeader: function() {
+            var model =  this.model,
+                file  = model.get('file')[0],
+                hdr   = model.get('hdr'),
+                from  = model.get('startTime'),
+                to    = from + model.get('dataLength'),
+                slts  = model.get('selection');
+            
+            if(model.get('colors').length === 0) {
+                // Set the colors, visibility, status (good or bad) and pass to view for rendering
+                model.set('colors',extendArray.initialize([hdr.ns],'custom',model.get('defaultColor')));
+                model.set('good',extendArray.initialize([hdr.ns],'custom',true));
+                model.set('visible',extendArray.initialize([hdr.ns],'custom',true));
+                slts.names[0] = 'Default';
+                slts.indices[0] = extendArray.serialIndex(0,19);
+                model.set('currentSlt','Default');
              }
              
              this.$el.html(template({fileName: file.name,
@@ -555,6 +637,7 @@ define(function (require) {
             
         },
         
+        // Render the data
         renderData: function() {
             if(this.model.get('dataCnt') === 0) return;
             var model   = this.model,
@@ -586,9 +669,8 @@ define(function (require) {
                 }
             }
             
-            for(var i = 0;i < time.length;i++) {
+            for(var i = 0;i < time.length;i++)
                 data[i].unshift(time[i])
-            }
             
             if(g) {
                 if(g.user_attrs_ !== null) {
@@ -606,6 +688,7 @@ define(function (require) {
             }
         },
         
+        // Trigger when user presses key on keyboard
         on_keypress: function(e) {
             if(e.keyCode === 37) // Left Button
                this.scrollLeft();
