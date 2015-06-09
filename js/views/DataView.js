@@ -60,7 +60,6 @@ define(function (require) {
             'click #resetSelect'  : 'resetSelection',
             'click #evType'       : 'crNewEvtType',
             'click #resetZoom'    : function() { g.resetZoom();},
-            'mousewheel #dataCont': 'wheeled',
             'click #scrollLeft'   : function() { this.scrollLeft();},
             'click #scrollRight'  : function() { this.scrollRight();},
             'click #scaleUp'      : function() { this.scaleUp();},
@@ -73,9 +72,31 @@ define(function (require) {
             'click #editSlt'      : 'editSlt',
             'click #applySlt'     : 'applySlt',
             'change #plotType'    : 'plotType',
-            'change input#scPlot' : 'changeScale',
+            'mousewheel #dataCont' : 'wheeled',
+            'change input#scPlot'      : 'changeScale',
             'change input#dataLength'  : 'changeLength',
-            'change input#editSlnName' : 'editSlnName'
+            'change input#editSlnName' : 'editSlnName',
+            'change input#jumpTo'      : 'jumpTo'
+        },
+        
+        jumpTo: function() {
+             var val  = parseFloat($("#jumpTo").val()),
+                to;
+            
+            if(isNaN(val)) {
+                $("#alertDiv").find('.modal-title').text('Enter valid number');
+                $("#alertDiv").modal('show');
+                $("#jumpTo").val('');
+                return;
+            }
+            else if(val < 0 || val > this.model.get('hdr').records) {
+                $("#alertDiv").find('.modal-title').text('Out of range');
+                $("#alertDiv").modal('show');
+                $("#jumpTo").val('');
+                return;
+            }
+            
+            this.options.reader.getData(this.model,val,val+this.model.get('dataLength'));
         },
         
         // Add a user channel selection

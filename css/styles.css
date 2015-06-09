@@ -116,3 +116,7 @@ li { cursor: pointer; cursor: hand; }
 #chList {
     height:300px
 }
+
+#jumpTo {
+    width: 75px
+}

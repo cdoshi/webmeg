@@ -147,7 +147,7 @@ define(function (require) {
             startRecord      = Math.floor(from),
             endRecord        = Math.ceil(to),
             oneRecord        = hdr.samF * hdr.ns * 2, // 2 is because sshort is 2 bytes long
-            totalRecord      = Math.round(model.get('dataLength')),
+            totalRecord      = endRecord - startRecord,
             totalBytesNeeded = totalRecord * oneRecord, 
             startByte        = hdr.dataStart + (startRecord * oneRecord), 
             endByte          = startByte + totalBytesNeeded,
@@ -169,7 +169,7 @@ define(function (require) {
             if(from - model.get('startTime') < 0.0000001) return;
         }
         
-        model.set('time',extendArray.serialIndex(from,to-1/hdr.samF,1/hdr.samF));
+        model.set('time',extendArray.serialIndex(from,to-1/hdr.samF,1/hdr.samF,[],samples.length));
         
         reader.onerror = function(e) {
             console.log(e.target.error.code);
