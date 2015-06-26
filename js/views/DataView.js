@@ -21,6 +21,8 @@ define(function (require) {
             this.listenTo(this.model, 'change:dataCnt',_.throttle(this.renderData, 500,{leading: false}));
             this.listenTo(this.model, 'change:scaling',_.throttle(this.renderData, 500,{leading: false}));
             this.listenTo(this.model, 'change:currentSlt',this.renderData);
+            this.listenTo(this.model, 'change:removeDC',this.renderData);
+            
             _.bindAll(this, 
                       "on_keypress",
                       "changeColor",
@@ -59,7 +61,7 @@ define(function (require) {
             'click #hideBad'      : 'hideBad',
             'click #resetSelect'  : 'resetSelection',
             'click #evType'       : 'crNewEvtType',
-            'click #resetZoom'    : function() { g.resetZoom();},
+            'click #removeDC'     : 'removeDC',
             'click #scrollLeft'   : function() { this.scrollLeft();},
             'click #scrollRight'  : function() { this.scrollRight();},
             'click #scaleUp'      : function() { this.scaleUp();},
@@ -77,6 +79,17 @@ define(function (require) {
             'change input#dataLength'  : 'changeLength',
             'change input#editSlnName' : 'editSlnName',
             'change input#jumpTo'      : 'jumpTo'
+        },
+        
+        removeDC: function() {
+            this.model.set('removeDC',!this.model.get('removeDC'));
+            
+            if(this.model.get('removeDC')) {
+                $("#removeDC").html('<span class="glyphicon glyphicon-ok"></span> Remove DC Offset');
+            }
+            else {
+                $("#removeDC").html('Remove DC Offset');
+            }
         },
         
         jumpTo: function() {
@@ -682,6 +695,10 @@ define(function (require) {
             $("#scPlot").val(model.get('scaling'));
             
             data = extendArray.scalarOperation(data,'divide',model.get('scaling'));
+            
+            if(model.get('removeDC')) {
+            }
+            
             
             if(model.get('typePlot') === 'Stacked') {
                 var addOffset = extendArray.serialIndex(1,indices.length);

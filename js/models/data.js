@@ -28,7 +28,8 @@ define(function (require) {
                 evType:[],
                 typePlot:'Stacked',
                 selection:{names:[],indices:[]},
-                currentSlt:''
+                currentSlt:'',
+                removeDC:false
             },
             initialize: function() {
             }
